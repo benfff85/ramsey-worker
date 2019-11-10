@@ -17,4 +17,4 @@ ramsey:
     queue:
       url: "http://localhost:8080/api/ramsey/work-units"
     fetch:
-      size: 5
+      size: 2

@@ -33,7 +33,7 @@ public class ClientRegister {
     @PostConstruct
     public void register() {
         log.info("Registering client");
-        HttpEntity<ClientDto> request = new HttpEntity<>(ClientDto.builder().vertexCount(vertexCount).subgraphSize(subgraphSize).type(ClientType.WORKER).build());
+        HttpEntity<ClientDto> request = new HttpEntity<>(ClientDto.builder().vertexCount(vertexCount).subgraphSize(subgraphSize).type(ClientType.CLIQUECHECKER).build());
         ResponseEntity<ClientDto> response = restTemplate.exchange(url, HttpMethod.POST, request, ClientDto.class);
         client = response.getBody();
         log.info("Client registered with id: {}", client.getClientId());
@@ -43,6 +43,10 @@ public class ClientRegister {
     public void phoneHome() {
         log.debug("Phoning Home");
         restTemplate.exchange(url, HttpMethod.PUT, new HttpEntity<>(client), ClientDto.class);
+    }
+
+    public String getClientId() {
+        return client.getClientId();
     }
 
 }
