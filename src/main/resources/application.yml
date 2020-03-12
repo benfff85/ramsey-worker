@@ -1,3 +1,12 @@
+logging:
+  level:
+    root: INFO
+  pattern:
+    level: "%clr([%X{X-B3-TraceId}]){blue} %clr(%5p){green}"
+
+server:
+  port: 8082
+
 ramsey:
   vertex-count: 288
   subgraph-size: 8

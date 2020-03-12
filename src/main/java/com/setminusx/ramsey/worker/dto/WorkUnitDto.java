@@ -1,6 +1,6 @@
 package com.setminusx.ramsey.worker.dto;
 
-import com.setminusx.ramsey.worker.model.Edge;
+import com.setminusx.ramsey.worker.model.WorkUnitEdge;
 import com.setminusx.ramsey.worker.model.WorkUnitPriority;
 import com.setminusx.ramsey.worker.model.WorkUnitStatus;
 import lombok.Data;
@@ -15,7 +15,7 @@ public class WorkUnitDto {
     private Integer subgraphSize;
     private Integer vertexCount;
     private Integer baseGraphId;
-    private List<Edge> edgesToFlip;
+    private List<WorkUnitEdge> edgesToFlip;
     private WorkUnitStatus status;
     private Integer cliqueCount;
     private Date createdDate;

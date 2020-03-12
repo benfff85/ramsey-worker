@@ -2,18 +2,20 @@ package com.setminusx.ramsey.worker.service;
 
 import com.setminusx.ramsey.worker.controller.ClientRegister;
 import com.setminusx.ramsey.worker.dto.WorkUnitDto;
+import com.setminusx.ramsey.worker.model.WorkUnitStatus;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.annotation.PostConstruct;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+
+import static java.util.Collections.singletonList;
+import static java.util.Objects.isNull;
 
 @Slf4j
 @Service
@@ -35,7 +37,7 @@ public class WorkUnitService {
     private RestTemplate restTemplate;
     private String workUnitUri;
 
-    public WorkUnitService(@Autowired ClientRegister clientRegister, @Autowired RestTemplate restTemplate) {
+    public WorkUnitService(ClientRegister clientRegister, RestTemplate restTemplate) {
         clientId = clientRegister.getClientId();
         this.restTemplate = restTemplate;
     }
@@ -46,17 +48,26 @@ public class WorkUnitService {
         workUnitUri = UriComponentsBuilder.fromHttpUrl(workUnitUrl)
                 .queryParam("vertexCount", vertexCount)
                 .queryParam("subgraphSize", subgraphSize)
-                .queryParam("clientId", clientId)
+                .queryParam("assignedClientId", clientId)
                 .queryParam("pageSize", fetchSize)
+                .queryParam("status", WorkUnitStatus.ASSIGNED)
                 .toUriString();
         log.info("URI for work unit fetch: {}", workUnitUri);
     }
 
     public List<WorkUnitDto> getWorkUnits() {
         log.info("Fetching {} work units", fetchSize);
-        ResponseEntity<List<WorkUnitDto>> response = restTemplate.exchange(workUnitUri, HttpMethod.POST, null,  new ParameterizedTypeReference<List<WorkUnitDto>>(){});
+        WorkUnitDto[] workUnitDtos = restTemplate.getForObject(workUnitUri, WorkUnitDto[].class);
+        if (isNull(workUnitDtos)) {
+            log.info("No work units found");
+            return Collections.emptyList();
+        }
         log.info("Work units fetched");
-        return response.getBody();
+        return Arrays.asList(workUnitDtos);
     }
 
+    public void publish(WorkUnitDto workUnit) {
+        log.info("Saving work unit {}", workUnit.getId());
+        restTemplate.postForObject(UriComponentsBuilder.fromHttpUrl(workUnitUrl).toUriString(), singletonList(workUnit), WorkUnitDto[].class);
+    }
 }
