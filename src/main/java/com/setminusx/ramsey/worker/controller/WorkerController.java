@@ -2,6 +2,7 @@ package com.setminusx.ramsey.worker.controller;
 
 import com.setminusx.ramsey.worker.dto.WorkUnitDto;
 import com.setminusx.ramsey.worker.model.Clique;
+import com.setminusx.ramsey.worker.model.EdgeMappedCliqueCollection;
 import com.setminusx.ramsey.worker.model.Graph;
 import com.setminusx.ramsey.worker.model.WorkUnitStatus;
 import com.setminusx.ramsey.worker.service.CliqueCheckService;
@@ -34,7 +35,7 @@ public class WorkerController {
     private final TargetedCliqueCheckService targetedCliqueCheckService;
 
     private Graph graph;
-    private List<Clique> baseGraphCliques;
+    private EdgeMappedCliqueCollection cliqueCollection;
 
 
     public WorkerController(WorkUnitService workUnitService, GraphService graphService, CliqueCheckService cliqueCheckService, TargetedCliqueCheckService targetedCliqueCheckService) {
@@ -47,6 +48,7 @@ public class WorkerController {
     @PostConstruct
     public void init() {
         graph = new Graph(vertexCount);
+        cliqueCollection = new EdgeMappedCliqueCollection(vertexCount);
     }
 
     @Scheduled(fixedDelay = 10000)
@@ -76,6 +78,7 @@ public class WorkerController {
             GraphUtil.flipEdges(graph, workUnit.getEdgesToFlip());
 
             if (workUnits.isEmpty()) {
+                workUnitService.flushPublishCache();
                 workUnits.addAll(workUnitService.getWorkUnits());
             }
 
@@ -87,12 +90,7 @@ public class WorkerController {
 
     private void enrichWorkUnit(List<Clique> derivedGraphCliques, WorkUnitDto workUnit) {
         log.info("Enriching work unit with analysis results");
-        Integer cliqueCount = derivedGraphCliques.size();
-        for (Clique clique : baseGraphCliques) {
-            if (clique.isValid()) {
-                cliqueCount++;
-            }
-        }
+        Integer cliqueCount = (derivedGraphCliques.size() + cliqueCollection.size()) - cliqueCollection.getCountOfCliquesContainingEdges(workUnit.getEdgesToFlip());
 
         log.info("Clique count for derived graph: {}", cliqueCount);
         workUnit.setCliqueCount(cliqueCount);
@@ -105,8 +103,8 @@ public class WorkerController {
         log.info("Applying coloring");
         graph.applyColoring(edgeData, graphId);
         log.info("Checking for cliques in base graph");
-        baseGraphCliques = cliqueCheckService.getCliques(graph);
-        log.info("Clique count for base graph: {}", baseGraphCliques.size());
+        cliqueCollection.setCliques(cliqueCheckService.getCliques(graph));
+        log.info("Clique count for base graph: {}", cliqueCollection.size());
     }
 
 }

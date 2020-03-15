@@ -71,10 +71,13 @@ public class WorkUnitService {
     public void publishBatch(WorkUnitDto workUnit) {
         workUnitsToPublish.add(workUnit);
         if (workUnitsToPublish.size() >= 50) {
-            log.info("Saving work units");
-            restTemplate.postForObject(UriComponentsBuilder.fromHttpUrl(workUnitUrl).toUriString(), workUnitsToPublish, WorkUnitDto[].class);
-            workUnitsToPublish.clear();
+            flushPublishCache();
         }
     }
 
+    public void flushPublishCache() {
+        log.info("Saving work units");
+        restTemplate.postForObject(UriComponentsBuilder.fromHttpUrl(workUnitUrl).toUriString(), workUnitsToPublish, WorkUnitDto[].class);
+        workUnitsToPublish.clear();
+    }
 }
