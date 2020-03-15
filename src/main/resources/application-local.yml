@@ -1,7 +1,7 @@
 ramsey:
   client:
+    url: "http://localhost:8080/api/ramsey/clients"
     registration:
-      url: "http://localhost:8080/api/ramsey/clients"
       phone-home:
         frequency-in-millis: 60000
   graph:
@@ -10,4 +10,4 @@ ramsey:
     queue:
       url: "http://localhost:8080/api/ramsey/work-units"
     fetch:
-      size: 2
+      size: 50

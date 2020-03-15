@@ -1,20 +1,17 @@
 package com.setminusx.ramsey.worker.service;
 
-import com.setminusx.ramsey.worker.model.Clique;
-import com.setminusx.ramsey.worker.model.EdgeColor;
-import com.setminusx.ramsey.worker.model.Graph;
-import com.setminusx.ramsey.worker.model.Vertex;
+import com.setminusx.ramsey.worker.model.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.setminusx.ramsey.worker.model.EdgeColor.BLUE;
-import static com.setminusx.ramsey.worker.model.EdgeColor.RED;
 
+@Slf4j
 @Component
-public class CliqueCheckService {
+public class TargetedCliqueCheckService {
 
     private Graph graph;
     private short vertexCount;
@@ -25,21 +22,28 @@ public class CliqueCheckService {
     private Short subgraphSize;
 
 
-    public List<Clique> getCliques(Graph graph) {
+    public List<Clique> getCliques(Graph graph, List<WorkUnitEdge> compromisedEdges) {
         this.graph = graph;
         vertexCount = (short) graph.getVertices().size();
         connectedVertices.clear();
         cliques.clear();
+        Vertex v1;
+        Vertex v2;
+        EdgeColor color;
 
-        for (int i = 0; i < vertexCount; i++) {
-            connectedVertices.add(graph.getVertices().get(i));
-            findCliqueRecursive(connectedVertices, RED);
-            connectedVertices.clear();
-        }
-
-        for (int i = 0; i < vertexCount; i++) {
-            connectedVertices.add(graph.getVertices().get(i));
-            findCliqueRecursive(connectedVertices, BLUE);
+        for (WorkUnitEdge compromisedEdge : compromisedEdges) {
+            v1 = graph.getVertexById(compromisedEdge.getVertexOne());
+            v2 = graph.getVertexById(compromisedEdge.getVertexTwo());
+            color = v1.getEdgeColor(v2);
+            connectedVertices.add(v1);
+            connectedVertices.add(v2);
+            for (Vertex v3 : graph.getVertices()) {
+                if (!v3.equals(v1) && !v3.equals(v2) && color.equals(v3.getEdgeColor(v1)) && color.equals(v3.getEdgeColor(v2))) {
+                    connectedVertices.add(v3);
+                    findCliqueRecursive(connectedVertices, color);
+                    connectedVertices.remove(v3);
+                }
+            }
             connectedVertices.clear();
         }
 
@@ -53,7 +57,7 @@ public class CliqueCheckService {
         // Loop through all vertices starting with the one after the last vertex in the chain
         for (short i = (short) (connectedVertices.get(connectedVertices.size() - 1).getId() + 1); i < vertexCount; i++) {
             // If the vertex being considered is connected
-            if (isConnected(connectedVertices, graph.getVertexById(i), color)) {
+            if (i != connectedVertices.get(0).getId() && i != connectedVertices.get(1).getId() && isConnected(connectedVertices, graph.getVertexById(i), color)) {
                 connectedVertices.add(graph.getVertexById(i));
                 // If this and makes a completed clique add it to the clique collection
                 if (connectedVertices.size() == subgraphSize) {

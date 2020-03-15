@@ -12,9 +12,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 import javax.annotation.PostConstruct;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
-import static java.util.Collections.singletonList;
 import static java.util.Objects.isNull;
 
 @Slf4j
@@ -37,6 +37,8 @@ public class WorkUnitService {
     private RestTemplate restTemplate;
     private String workUnitUri;
 
+    private List<WorkUnitDto> workUnitsToPublish = new LinkedList<>();
+
     public WorkUnitService(ClientRegister clientRegister, RestTemplate restTemplate) {
         clientId = clientRegister.getClientId();
         this.restTemplate = restTemplate;
@@ -58,7 +60,7 @@ public class WorkUnitService {
     public List<WorkUnitDto> getWorkUnits() {
         log.info("Fetching {} work units", fetchSize);
         WorkUnitDto[] workUnitDtos = restTemplate.getForObject(workUnitUri, WorkUnitDto[].class);
-        if (isNull(workUnitDtos)) {
+        if (isNull(workUnitDtos) || workUnitDtos.length == 0) {
             log.info("No work units found");
             return Collections.emptyList();
         }
@@ -66,8 +68,13 @@ public class WorkUnitService {
         return Arrays.asList(workUnitDtos);
     }
 
-    public void publish(WorkUnitDto workUnit) {
-        log.info("Saving work unit {}", workUnit.getId());
-        restTemplate.postForObject(UriComponentsBuilder.fromHttpUrl(workUnitUrl).toUriString(), singletonList(workUnit), WorkUnitDto[].class);
+    public void publishBatch(WorkUnitDto workUnit) {
+        workUnitsToPublish.add(workUnit);
+        if (workUnitsToPublish.size() >= 50) {
+            log.info("Saving work units");
+            restTemplate.postForObject(UriComponentsBuilder.fromHttpUrl(workUnitUrl).toUriString(), workUnitsToPublish, WorkUnitDto[].class);
+            workUnitsToPublish.clear();
+        }
     }
+
 }
