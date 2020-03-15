@@ -66,15 +66,15 @@ public class WorkerController {
             }
             workUnit.setProcessingStartedDate(now());
 
-            log.info("Flipping edges");
+            log.debug("Flipping edges");
             GraphUtil.flipEdges(graph, workUnit.getEdgesToFlip());
 
-            log.info("Checking for cliques in derived graph");
+            log.debug("Checking for cliques in derived graph");
             derivedGraphCliques = targetedCliqueCheckService.getCliques(graph, workUnit.getEdgesToFlip());
             enrichWorkUnit(derivedGraphCliques, workUnit);
             workUnitService.publishBatch(workUnit);
 
-            log.info("Reverting base graph");
+            log.debug("Reverting base graph");
             GraphUtil.flipEdges(graph, workUnit.getEdgesToFlip());
 
             if (workUnits.isEmpty()) {
@@ -89,7 +89,7 @@ public class WorkerController {
     }
 
     private void enrichWorkUnit(List<Clique> derivedGraphCliques, WorkUnitDto workUnit) {
-        log.info("Enriching work unit with analysis results");
+        log.debug("Enriching work unit with analysis results");
         Integer cliqueCount = (derivedGraphCliques.size() + cliqueCollection.size()) - cliqueCollection.getCountOfCliquesContainingEdges(workUnit.getEdgesToFlip());
 
         log.info("Clique count for derived graph: {}", cliqueCount);

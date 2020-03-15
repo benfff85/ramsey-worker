@@ -4,17 +4,21 @@ import com.setminusx.ramsey.worker.model.WorkUnitEdge;
 import com.setminusx.ramsey.worker.model.WorkUnitPriority;
 import com.setminusx.ramsey.worker.model.WorkUnitStatus;
 import lombok.Data;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
+@ToString(onlyExplicitlyIncluded = true)
 public class WorkUnitDto {
 
+    @ToString.Include
     private Integer id;
     private Integer subgraphSize;
     private Integer vertexCount;
     private Integer baseGraphId;
+    @ToString.Include
     private List<WorkUnitEdge> edgesToFlip;
     private WorkUnitStatus status;
     private Integer cliqueCount;
