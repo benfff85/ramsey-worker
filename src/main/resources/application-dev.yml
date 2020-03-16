@@ -3,11 +3,11 @@ ramsey:
     url: "http://ramsey-mw:8080/api/ramsey/clients"
     registration:
       phone-home:
-        frequency-in-millis: 60000
+        frequency-in-millis: ${CLIENT_PHONE_HOME_FREQ:60000}
   graph:
     url: "http://ramsey-mw:8080/api/ramsey/graphs"
   work-unit:
     queue:
       url: "http://ramsey-mw:8080/api/ramsey/work-units"
     fetch:
-      size: 100
+      size: ${WORK_UNIT_FETCH_COUNT:100}
