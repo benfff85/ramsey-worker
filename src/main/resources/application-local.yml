@@ -9,7 +9,8 @@ ramsey:
   work-unit:
     queue:
       url: "http://localhost:8080/api/ramsey/work-units"
-    fetch:
-      size: 100
-    publish:
-      size: 50
+      feeder:
+        frequency-in-millis: 60000
+        minimum-count: 50
+        fetch-size: 100
+      publish-size: 50

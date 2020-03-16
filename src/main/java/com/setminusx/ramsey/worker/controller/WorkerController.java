@@ -11,12 +11,12 @@ import com.setminusx.ramsey.worker.service.TargetedCliqueCheckService;
 import com.setminusx.ramsey.worker.service.WorkUnitService;
 import com.setminusx.ramsey.worker.utility.GraphUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
@@ -33,16 +33,18 @@ public class WorkerController {
     private final GraphService graphService;
     private final CliqueCheckService cliqueCheckService;
     private final TargetedCliqueCheckService targetedCliqueCheckService;
+    private Queue<WorkUnitDto> workUnits;
 
     private Graph graph;
     private EdgeMappedCliqueCollection cliqueCollection;
 
 
-    public WorkerController(WorkUnitService workUnitService, GraphService graphService, CliqueCheckService cliqueCheckService, TargetedCliqueCheckService targetedCliqueCheckService) {
+    public WorkerController(WorkUnitService workUnitService, GraphService graphService, CliqueCheckService cliqueCheckService, TargetedCliqueCheckService targetedCliqueCheckService, @Qualifier("workUnitQueue") Queue<WorkUnitDto> workUnits) {
         this.workUnitService = workUnitService;
         this.graphService = graphService;
         this.cliqueCheckService = cliqueCheckService;
         this.targetedCliqueCheckService = targetedCliqueCheckService;
+        this.workUnits = workUnits;
     }
 
     @PostConstruct
@@ -55,7 +57,6 @@ public class WorkerController {
     public void process() {
         List<Clique> derivedGraphCliques;
 
-        Queue<WorkUnitDto> workUnits = new LinkedList<>(workUnitService.getWorkUnits());
         WorkUnitDto workUnit;
         while (!workUnits.isEmpty()) {
             workUnit = workUnits.poll();
@@ -77,13 +78,9 @@ public class WorkerController {
             log.debug("Reverting base graph");
             GraphUtil.flipEdges(graph, workUnit.getEdgesToFlip());
 
-            if (workUnits.isEmpty()) {
-                workUnitService.flushPublishCache();
-                workUnits.addAll(workUnitService.getWorkUnits());
-            }
-
         }
 
+        workUnitService.flushPublishCache();
         log.warn("Worker out of work, sleeping and trying again. Consider increasing the work unit creation rate.");
 
     }

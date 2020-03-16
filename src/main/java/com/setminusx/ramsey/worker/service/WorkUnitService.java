@@ -24,10 +24,10 @@ public class WorkUnitService {
     @Value("${ramsey.work-unit.queue.url}")
     private String workUnitUrl;
 
-    @Value("${ramsey.work-unit.fetch.size}")
+    @Value("${ramsey.work-unit.queue.feeder.fetch-size}")
     private Integer fetchSize;
 
-    @Value("${ramsey.work-unit.publish.size}")
+    @Value("${ramsey.work-unit.queue.publish-size}")
     private Integer publishSize;
 
     @Value("${ramsey.vertex-count}")
@@ -79,8 +79,10 @@ public class WorkUnitService {
     }
 
     public void flushPublishCache() {
-        log.info("Saving work units");
-        restTemplate.postForObject(UriComponentsBuilder.fromHttpUrl(workUnitUrl).toUriString(), workUnitsToPublish, WorkUnitDto[].class);
-        workUnitsToPublish.clear();
+        if (!workUnitsToPublish.isEmpty()) {
+            log.info("Saving work units");
+            restTemplate.postForObject(UriComponentsBuilder.fromHttpUrl(workUnitUrl).toUriString(), workUnitsToPublish, WorkUnitDto[].class);
+            workUnitsToPublish.clear();
+        }
     }
 }
