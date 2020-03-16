@@ -11,3 +11,5 @@ ramsey:
       url: "http://ramsey-mw:8080/api/ramsey/work-units"
     fetch:
       size: ${WORK_UNIT_FETCH_COUNT:100}
+    publish:
+      size: ${WORK_UNIT_PUBLISH_COUNT:50}

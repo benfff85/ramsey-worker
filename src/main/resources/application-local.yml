@@ -11,3 +11,5 @@ ramsey:
       url: "http://localhost:8080/api/ramsey/work-units"
     fetch:
       size: 100
+    publish:
+      size: 50

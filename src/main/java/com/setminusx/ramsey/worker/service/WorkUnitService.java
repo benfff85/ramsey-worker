@@ -27,6 +27,9 @@ public class WorkUnitService {
     @Value("${ramsey.work-unit.fetch.size}")
     private Integer fetchSize;
 
+    @Value("${ramsey.work-unit.publish.size}")
+    private Integer publishSize;
+
     @Value("${ramsey.vertex-count}")
     private Integer vertexCount;
 
@@ -70,7 +73,7 @@ public class WorkUnitService {
 
     public void publishBatch(WorkUnitDto workUnit) {
         workUnitsToPublish.add(workUnit);
-        if (workUnitsToPublish.size() >= 50) {
+        if (workUnitsToPublish.size() >= publishSize) {
             flushPublishCache();
         }
     }
