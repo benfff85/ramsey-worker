@@ -56,8 +56,9 @@ public class WorkerController {
     @Scheduled(fixedDelay = 10000)
     public void process() {
         List<Clique> derivedGraphCliques;
-
         WorkUnitDto workUnit;
+
+        workUnits.addAll(workUnitService.getWorkUnits());
         while (!workUnits.isEmpty()) {
             workUnit = workUnits.poll();
             log.info("Processing WorkUnit: {}", workUnit);
