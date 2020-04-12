@@ -56,8 +56,9 @@ public class WorkerController {
     @Scheduled(fixedDelay = 10000)
     public void process() {
         List<Clique> derivedGraphCliques;
-
         WorkUnitDto workUnit;
+
+        workUnits.addAll(workUnitService.getWorkUnits());
         while (!workUnits.isEmpty()) {
             workUnit = workUnits.poll();
             log.info("Processing WorkUnit: {}", workUnit);
@@ -78,9 +79,14 @@ public class WorkerController {
             log.debug("Reverting base graph");
             GraphUtil.flipEdges(graph, workUnit.getEdgesToFlip());
 
+            if (workUnits.isEmpty()) {
+                log.info("Work unit queue is empty, attempting to fetch more work units.");
+                workUnitService.flushPublishCache();
+                workUnits.addAll(workUnitService.getWorkUnits());
+            }
+
         }
 
-        workUnitService.flushPublishCache();
         log.warn("Worker out of work, sleeping and trying again. Consider increasing the work unit creation rate.");
 
     }

@@ -24,7 +24,7 @@ public class WorkUnitService {
     @Value("${ramsey.work-unit.queue.url}")
     private String workUnitUrl;
 
-    @Value("${ramsey.work-unit.queue.feeder.fetch-size}")
+    @Value("${ramsey.work-unit.queue.fetch-size}")
     private Integer fetchSize;
 
     @Value("${ramsey.work-unit.queue.publish-size}")
@@ -36,14 +36,14 @@ public class WorkUnitService {
     @Value("${ramsey.subgraph-size}")
     private Integer subgraphSize;
 
-    private String clientId;
+    private ClientRegister clientRegister;
     private RestTemplate restTemplate;
     private String workUnitUri;
 
     private List<WorkUnitDto> workUnitsToPublish = new LinkedList<>();
 
     public WorkUnitService(ClientRegister clientRegister, RestTemplate restTemplate) {
-        clientId = clientRegister.getClientId();
+        this.clientRegister = clientRegister;
         this.restTemplate = restTemplate;
     }
 
@@ -53,7 +53,7 @@ public class WorkUnitService {
         workUnitUri = UriComponentsBuilder.fromHttpUrl(workUnitUrl)
                 .queryParam("vertexCount", vertexCount)
                 .queryParam("subgraphSize", subgraphSize)
-                .queryParam("assignedClientId", clientId)
+                .queryParam("assignedClientId", clientRegister.getClientId())
                 .queryParam("pageSize", fetchSize)
                 .queryParam("status", WorkUnitStatus.ASSIGNED)
                 .toUriString();
