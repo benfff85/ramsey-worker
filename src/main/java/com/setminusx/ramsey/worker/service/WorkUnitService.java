@@ -36,11 +36,11 @@ public class WorkUnitService {
     @Value("${ramsey.subgraph-size}")
     private Integer subgraphSize;
 
-    private ClientRegister clientRegister;
-    private RestTemplate restTemplate;
+    private final ClientRegister clientRegister;
+    private final RestTemplate restTemplate;
     private String workUnitUri;
 
-    private List<WorkUnitDto> workUnitsToPublish = new LinkedList<>();
+    private final List<WorkUnitDto> workUnitsToPublish = new LinkedList<>();
 
     public WorkUnitService(ClientRegister clientRegister, RestTemplate restTemplate) {
         this.clientRegister = clientRegister;

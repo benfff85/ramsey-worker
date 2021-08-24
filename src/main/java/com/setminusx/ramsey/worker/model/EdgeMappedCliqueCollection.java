@@ -10,8 +10,8 @@ import java.util.Map;
 @Slf4j
 public class EdgeMappedCliqueCollection {
 
-    private List<Clique> cliques;
-    private Map<WorkUnitEdge, Integer> edgeMap;
+    private final List<Clique> cliques;
+    private final Map<WorkUnitEdge, Integer> edgeMap;
 
     public EdgeMappedCliqueCollection(Short vertexCount) {
         cliques = new LinkedList<>();
@@ -42,13 +42,13 @@ public class EdgeMappedCliqueCollection {
 
         short vertexAId;
         WorkUnitEdge edge = new WorkUnitEdge();
-        int cliqueSize = inputCliques.get(0).getVertices().size();
+        int cliqueSize = inputCliques.get(0).vertices().size();
         for (Clique clique : inputCliques) {
             for (short i = 0; i < cliqueSize; i++) {
-                vertexAId = clique.getVertices().get(i).getId();
+                vertexAId = clique.vertices().get(i).getId();
                 for (short j = (short) (i + 1); j < cliqueSize; j++) {
                     edge.setVertexOne(vertexAId);
-                    edge.setVertexTwo(clique.getVertices().get(j).getId());
+                    edge.setVertexTwo(clique.vertices().get(j).getId());
                     edgeMap.replace(edge, edgeMap.get(edge) + 1);
                 }
             }

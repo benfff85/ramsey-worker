@@ -33,7 +33,7 @@ public class WorkerController {
     private final GraphService graphService;
     private final CliqueCheckService cliqueCheckService;
     private final TargetedCliqueCheckService targetedCliqueCheckService;
-    private Queue<WorkUnitDto> workUnits;
+    private final Queue<WorkUnitDto> workUnits;
 
     private Graph graph;
     private EdgeMappedCliqueCollection cliqueCollection;

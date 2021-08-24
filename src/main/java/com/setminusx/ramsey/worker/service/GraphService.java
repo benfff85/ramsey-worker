@@ -17,7 +17,7 @@ public class GraphService {
     @Value("${ramsey.graph.url}")
     private String graphUrl;
 
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
 
     public GraphService(@Autowired RestTemplate restTemplate) {
         this.restTemplate = restTemplate;

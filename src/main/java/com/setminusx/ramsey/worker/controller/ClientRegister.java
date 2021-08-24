@@ -44,7 +44,7 @@ public class ClientRegister {
                 .createdDate(now())
                 .build();
         phoneHome();
-        log.info("Client created with id: \'{}\'", client.getClientId());
+        log.info("Client created with id: '{}'", client.getClientId());
     }
 
     @Scheduled(fixedRateString = "${ramsey.client.registration.phone-home.frequency-in-millis}")
