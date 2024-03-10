@@ -8,10 +8,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import static com.setminusx.ramsey.worker.model.ClientStatus.ACTIVE;
-import static java.time.LocalDateTime.now;
+import static com.setminusx.ramsey.worker.utility.TimeUtility.now;
 
 @Slf4j
 @Component

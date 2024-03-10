@@ -1,2 +1,2 @@
-# ramsey-worker
+# Ramsey Worker
 Worker component for the Ramsey Project

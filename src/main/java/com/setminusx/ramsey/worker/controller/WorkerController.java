@@ -16,11 +16,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.util.List;
 import java.util.Queue;
 
-import static java.time.LocalDateTime.now;
+import static com.setminusx.ramsey.worker.utility.TimeUtility.now;
+
 
 @Slf4j
 @Component
