@@ -1,5 +1,6 @@
 package com.setminusx.ramsey.worker.dto;
 
+import com.setminusx.ramsey.worker.model.WorkUnitAnalysisType;
 import com.setminusx.ramsey.worker.model.WorkUnitEdge;
 import com.setminusx.ramsey.worker.model.WorkUnitPriority;
 import com.setminusx.ramsey.worker.model.WorkUnitStatus;
@@ -28,5 +29,6 @@ public class WorkUnitDto {
     private LocalDateTime completedDate;
     private String assignedClient;
     private WorkUnitPriority priority;
+    private WorkUnitAnalysisType workUnitAnalysisType;
 
 }
