@@ -30,7 +30,6 @@ public class NaiveCliqueCheckService {
         for (int[] combination : combinations) {
             log.info("Combination: {}", combination);
             vertices.clear();
-            // TODO reinitialize vertices instead of clearing
             stream(combination).forEach(index -> vertices.add(graph.getVertices().get(index)));
             if(isClique(vertices)) {
                 log.info("Clique found: {}", vertices);
