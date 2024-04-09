@@ -55,7 +55,7 @@ public class TargetedCliqueCheckService {
     private void findCliqueRecursive(List<Vertex> connectedVertices, EdgeColor color) {
 
         // Loop through all vertices starting with the one after the last vertex in the chain
-        for (short i = (short) (connectedVertices.get(connectedVertices.size() - 1).getId() + 1); i < vertexCount; i++) {
+        for (short i = (short) (connectedVertices.getLast().getId() + 1); i < vertexCount; i++) {
             // If the vertex being considered is connected
             if (i != connectedVertices.get(0).getId() && i != connectedVertices.get(1).getId() && isConnected(connectedVertices, graph.getVertexById(i), color)) {
                 connectedVertices.add(graph.getVertexById(i));

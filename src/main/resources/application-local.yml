@@ -1,13 +1,16 @@
 ramsey:
+  mw:
+    host: "https://api.setminusx.com"
+  #    host: "http://localhost:8080"
   client:
-    url: "http://localhost:8080/api/ramsey/clients"
+    url: ${ramsey.mw.host}/api/ramsey/clients
     registration:
       phone-home:
         frequency-in-millis: 60000
   graph:
-    url: "http://localhost:8080/api/ramsey/graphs"
+    url: ${ramsey.mw.host}/api/ramsey/graphs
   work-unit:
     queue:
-      url: "http://localhost:8080/api/ramsey/work-units"
+      url: ${ramsey.mw.host}/api/ramsey/work-units
       fetch-size: 100
       publish-size: 50
