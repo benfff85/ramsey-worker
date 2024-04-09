@@ -11,8 +11,7 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 import java.util.Queue;
 
-import static com.setminusx.ramsey.worker.model.WorkUnitAnalysisType.COMPREHENSIVE;
-import static com.setminusx.ramsey.worker.model.WorkUnitAnalysisType.TARGETED;
+import static com.setminusx.ramsey.worker.model.WorkUnitAnalysisType.*;
 
 
 @Slf4j
@@ -23,10 +22,13 @@ public class WorkUnitRouter {
     private final Queue<WorkUnitDto> workUnits;
     private final Map<WorkUnitAnalysisType, WorkUnitProcessor> processorMap;
 
-    public WorkUnitRouter(WorkUnitService workUnitService, TargetedWorkUnitProcessor targetedWorkUnitProcessor, ComprehensiveWorkUnitProcessor comprehensiveWorkUnitProcessor, @Qualifier("workUnitQueue") Queue<WorkUnitDto> workUnits) {
+    public WorkUnitRouter(WorkUnitService workUnitService, TargetedWorkUnitProcessor targetedWorkUnitProcessor, ComprehensiveWorkUnitProcessor comprehensiveWorkUnitProcessor, NaiveWorkUnitProcessor naiveWorkUnitProcessor, @Qualifier("workUnitQueue") Queue<WorkUnitDto> workUnits) {
         this.workUnitService = workUnitService;
         this.workUnits = workUnits;
-        this.processorMap = Map.of(TARGETED, targetedWorkUnitProcessor, COMPREHENSIVE, comprehensiveWorkUnitProcessor);
+        this.processorMap = Map.of(
+                NAIVE, naiveWorkUnitProcessor,
+                TARGETED, targetedWorkUnitProcessor,
+                COMPREHENSIVE, comprehensiveWorkUnitProcessor);
     }
 
     @Scheduled(fixedDelay = 10000)
