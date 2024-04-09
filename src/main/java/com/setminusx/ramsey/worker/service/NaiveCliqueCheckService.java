@@ -1,6 +1,7 @@
 package com.setminusx.ramsey.worker.service;
 
 import com.setminusx.ramsey.worker.model.*;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.math3.util.Combinations;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -10,6 +11,7 @@ import java.util.List;
 
 import static java.util.Arrays.stream;
 
+@Slf4j
 @Component
 public class NaiveCliqueCheckService {
 
@@ -26,9 +28,12 @@ public class NaiveCliqueCheckService {
 
         Combinations combinations = new Combinations(vertexCount, subgraphSize);
         for (int[] combination : combinations) {
+            log.info("Combination: {}", combination);
             vertices.clear();
+            // TODO reinitialize vertices instead of clearing
             stream(combination).forEach(index -> vertices.add(graph.getVertices().get(index)));
             if(isClique(vertices)) {
+                log.info("Clique found: {}", vertices);
                 cliques.add(new Clique(new ArrayList<>(vertices)));
             }
         }
