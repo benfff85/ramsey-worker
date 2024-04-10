@@ -13,6 +13,7 @@ import java.util.Queue;
 
 import static com.setminusx.ramsey.worker.model.WorkUnitAnalysisType.*;
 
+
 @Slf4j
 @Component
 public class WorkUnitRouter {
