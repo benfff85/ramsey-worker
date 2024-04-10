@@ -4,13 +4,13 @@ import com.setminusx.ramsey.worker.model.WorkUnitAnalysisType;
 import com.setminusx.ramsey.worker.model.WorkUnitEdge;
 import com.setminusx.ramsey.worker.model.WorkUnitPriority;
 import com.setminusx.ramsey.worker.model.WorkUnitStatus;
-import lombok.Data;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
+@Builder
 @ToString(onlyExplicitlyIncluded = true)
 public class WorkUnitDto {
 
