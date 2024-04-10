@@ -10,6 +10,8 @@ ramsey:
   graph:
     url: ${ramsey.mw.host}/api/ramsey/graphs
   work-unit:
+    router:
+      frequency-in-millis: 1000
     queue:
       url: ${ramsey.mw.host}/api/ramsey/work-units
       fetch-size: 100
