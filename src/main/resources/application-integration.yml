@@ -1,6 +1,7 @@
 ramsey:
   mw:
-    host: "https://api.setminusx.com"
+#    host: "https://api.setminusx.com"
+    host: "http://localhost:8080"
   client:
     url: ${ramsey.mw.host}/api/ramsey/clients
     registration:
@@ -10,7 +11,7 @@ ramsey:
     url: ${ramsey.mw.host}/api/ramsey/graphs
   work-unit:
     router:
-      frequency-in-millis: ${WORK_UNIT_ROUTER_FREQ:1000}
+      frequency-in-millis: ${WORK_UNIT_ROUTER_FREQ:60000}
     queue:
       url: ${ramsey.mw.host}/api/ramsey/work-units
       fetch-size: ${WORK_UNIT_FETCH_COUNT:100}
