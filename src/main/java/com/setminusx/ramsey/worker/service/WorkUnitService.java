@@ -47,7 +47,6 @@ public class WorkUnitService {
 
     @PostConstruct
     private void createUri() {
-        log.info("Creating URI for work unit fetch");
         workUnitUri = UriComponentsBuilder.fromHttpUrl(workUnitUrl)
                 .queryParam("vertexCount", vertexCount)
                 .queryParam("subgraphSize", subgraphSize)
@@ -59,13 +58,13 @@ public class WorkUnitService {
     }
 
     public List<WorkUnitDto> getWorkUnits() {
-        log.info("Fetching {} work units", fetchSize);
+        log.info("Fetching work units, fetchSize: {}", fetchSize);
         List<WorkUnitDto> workUnitDtos = Arrays.asList(requireNonNull(restTemplate.getForObject(workUnitUri, WorkUnitDto[].class)));
         if (workUnitDtos.isEmpty()) {
             log.info("No work units found");
             return Collections.emptyList();
         }
-        log.info("Work units fetched");
+        log.info("Work units fetched, count: {}", workUnitDtos.size());
         return workUnitDtos;
     }
 
@@ -78,7 +77,7 @@ public class WorkUnitService {
 
     public void flushPublishCache() {
         if (!workUnitsToPublish.isEmpty()) {
-            log.info("Saving work units");
+            log.info("Saving work units, count: {}", workUnitsToPublish.size());
             restTemplate.postForObject(UriComponentsBuilder.fromHttpUrl(workUnitUrl).toUriString(), workUnitsToPublish, WorkUnitDto[].class);
             workUnitsToPublish.clear();
         }

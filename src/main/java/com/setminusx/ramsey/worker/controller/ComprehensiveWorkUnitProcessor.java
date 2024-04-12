@@ -22,10 +22,10 @@ import static com.setminusx.ramsey.worker.utility.TimeUtility.now;
 @Component
 public class ComprehensiveWorkUnitProcessor implements WorkUnitProcessor {
 
-    @Value("${ramsey.vertex-count}")
-    private Short vertexCount;
     private final GraphService graphService;
     private final CliqueCheckService cliqueCheckService;
+    @Value("${ramsey.vertex-count}")
+    private Short vertexCount;
     private Graph graph;
 
 
@@ -41,25 +41,26 @@ public class ComprehensiveWorkUnitProcessor implements WorkUnitProcessor {
 
     @Override
     public void process(WorkUnitDto workUnit) {
-            log.info("Processing WorkUnit: {}", workUnit);
+        log.info("Processing WorkUnit: {}", workUnit);
 
-            if (!workUnit.getBaseGraphId().equals(graph.getId())) {
-                GraphDto graphDto = graphService.getGraphById(workUnit.getBaseGraphId());
-                graph.applyColoring(graphDto.getEdgeData(), graphDto.getGraphId());
-            }
-            workUnit.setProcessingStartedDate(now());
+        if (!workUnit.getBaseGraphId().equals(graph.getId())) {
+            GraphDto graphDto = graphService.getGraphById(workUnit.getBaseGraphId());
+            graph.applyColoring(graphDto.getEdgeData(), graphDto.getGraphId());
+        }
+        workUnit.setProcessingStartedDate(now());
 
-            log.debug("Flipping edges");
-            GraphUtil.flipEdges(graph, workUnit.getEdgesToFlip());
+        log.debug("Flipping edges");
+        GraphUtil.flipEdges(graph, workUnit.getEdgesToFlip());
 
-            log.debug("Checking for cliques in derived graph");
-            List<Clique> derivedGraphCliques = cliqueCheckService.getCliques(graph);
-            workUnit.setCliqueCount(derivedGraphCliques.size());
-            workUnit.setCompletedDate(now());
-            workUnit.setStatus(WorkUnitStatus.COMPLETE);
+        log.debug("Checking for cliques in derived graph");
+        List<Clique> derivedGraphCliques = cliqueCheckService.getCliques(graph);
+        workUnit.setCliqueCount(derivedGraphCliques.size());
+        workUnit.setCompletedDate(now());
+        workUnit.setStatus(WorkUnitStatus.COMPLETE);
+        log.info("Clique count for derived graph: {}", derivedGraphCliques.size());
 
-            log.debug("Reverting base graph");
-            GraphUtil.flipEdges(graph, workUnit.getEdgesToFlip());
+        log.debug("Reverting base graph");
+        GraphUtil.flipEdges(graph, workUnit.getEdgesToFlip());
 
     }
 
