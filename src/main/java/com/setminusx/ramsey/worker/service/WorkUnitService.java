@@ -10,12 +10,10 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import jakarta.annotation.PostConstruct;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 
-import static java.util.Objects.isNull;
+import java.util.*;
+
+import static java.util.Objects.requireNonNull;
 
 @Slf4j
 @Service
@@ -62,13 +60,13 @@ public class WorkUnitService {
 
     public List<WorkUnitDto> getWorkUnits() {
         log.info("Fetching {} work units", fetchSize);
-        WorkUnitDto[] workUnitDtos = restTemplate.getForObject(workUnitUri, WorkUnitDto[].class);
-        if (isNull(workUnitDtos) || workUnitDtos.length == 0) {
+        List<WorkUnitDto> workUnitDtos = Arrays.asList(requireNonNull(restTemplate.getForObject(workUnitUri, WorkUnitDto[].class)));
+        if (workUnitDtos.isEmpty()) {
             log.info("No work units found");
             return Collections.emptyList();
         }
         log.info("Work units fetched");
-        return Arrays.asList(workUnitDtos);
+        return workUnitDtos;
     }
 
     public void publishBatch(WorkUnitDto workUnit) {
