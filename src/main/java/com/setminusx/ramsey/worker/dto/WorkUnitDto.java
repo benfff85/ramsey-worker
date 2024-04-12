@@ -29,6 +29,7 @@ public class WorkUnitDto {
     private LocalDateTime completedDate;
     private String assignedClient;
     private WorkUnitPriority priority;
+    @ToString.Include
     private WorkUnitAnalysisType workUnitAnalysisType;
 
 }
