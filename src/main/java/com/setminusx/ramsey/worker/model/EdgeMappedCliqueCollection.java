@@ -3,19 +3,18 @@ package com.setminusx.ramsey.worker.model;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 @Slf4j
 public class EdgeMappedCliqueCollection {
 
-    private final List<Clique> cliques;
     private final Map<WorkUnitEdge, Integer> edgeMap;
+    private Integer cliqueCount;
 
     public EdgeMappedCliqueCollection(Short vertexCount) {
-        cliques = new LinkedList<>();
         edgeMap = new HashMap<>();
+        cliqueCount = 0;
 
         WorkUnitEdge edge;
         for (short i = 0; i < vertexCount; i++) {
@@ -29,12 +28,12 @@ public class EdgeMappedCliqueCollection {
     }
 
     public Integer size() {
-        return cliques.size();
+        return cliqueCount;
     }
 
     public void setCliques(List<Clique> inputCliques) {
-        cliques.clear();
-        cliques.addAll(inputCliques);
+
+        cliqueCount = inputCliques.size();
 
         for (WorkUnitEdge edge : edgeMap.keySet()) {
             edgeMap.replace(edge, 0);
@@ -42,7 +41,7 @@ public class EdgeMappedCliqueCollection {
 
         short vertexAId;
         WorkUnitEdge edge = new WorkUnitEdge();
-        int cliqueSize = inputCliques.get(0).vertices().size();
+        int cliqueSize = inputCliques.getFirst().vertices().size();
         for (Clique clique : inputCliques) {
             for (short i = 0; i < cliqueSize; i++) {
                 vertexAId = clique.vertices().get(i).getId();
