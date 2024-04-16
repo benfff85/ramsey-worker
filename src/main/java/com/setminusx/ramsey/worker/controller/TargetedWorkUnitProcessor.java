@@ -1,7 +1,6 @@
 package com.setminusx.ramsey.worker.controller;
 
 import com.setminusx.ramsey.worker.dto.WorkUnitDto;
-import com.setminusx.ramsey.worker.model.Clique;
 import com.setminusx.ramsey.worker.model.EdgeMappedCliqueCollection;
 import com.setminusx.ramsey.worker.model.Graph;
 import com.setminusx.ramsey.worker.model.WorkUnitStatus;
@@ -13,8 +12,6 @@ import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 import static com.setminusx.ramsey.worker.utility.TimeUtility.now;
 
@@ -58,8 +55,8 @@ public class TargetedWorkUnitProcessor implements WorkUnitProcessor {
             GraphUtil.flipEdges(graph, workUnit.getEdgesToFlip());
 
             log.debug("Checking for cliques in derived graph");
-            List<Clique> derivedGraphCliques = targetedCliqueCheckService.getCliques(graph, workUnit.getEdgesToFlip());
-            enrichWorkUnit(derivedGraphCliques, workUnit);
+            Integer derivedGraphCliqueCount = targetedCliqueCheckService.getCliques(graph, workUnit.getEdgesToFlip());
+            enrichWorkUnit(derivedGraphCliqueCount, workUnit);
 
             log.debug("Reverting base graph");
             GraphUtil.flipEdges(graph, workUnit.getEdgesToFlip());
@@ -75,9 +72,9 @@ public class TargetedWorkUnitProcessor implements WorkUnitProcessor {
         log.info("Clique count for base graph: {}", cliqueCollection.size());
     }
 
-    private void enrichWorkUnit(List<Clique> derivedGraphCliques, WorkUnitDto workUnit) {
+    private void enrichWorkUnit(Integer derivedGraphCliqueCount, WorkUnitDto workUnit) {
         log.debug("Enriching work unit with analysis results");
-        Integer cliqueCount = (derivedGraphCliques.size() + cliqueCollection.size()) - cliqueCollection.getCountOfCliquesContainingEdges(workUnit.getEdgesToFlip());
+        Integer cliqueCount = (derivedGraphCliqueCount + cliqueCollection.size()) - cliqueCollection.getCountOfCliquesContainingEdges(workUnit.getEdgesToFlip());
 
         log.info("Clique count for derived graph: {}", cliqueCount);
         workUnit.setCliqueCount(cliqueCount);

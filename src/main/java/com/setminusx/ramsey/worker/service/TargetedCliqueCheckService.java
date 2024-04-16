@@ -16,17 +16,17 @@ public class TargetedCliqueCheckService {
     private Graph graph;
     private short vertexCount;
     private final List<Vertex> connectedVertices = new ArrayList<>();
-    private final List<Clique> cliques = new ArrayList<>();
+    private Integer cliqueCount;
 
     @Value("${ramsey.subgraph-size}")
     private Short subgraphSize;
 
 
-    public List<Clique> getCliques(Graph graph, List<WorkUnitEdge> compromisedEdges) {
+    public Integer getCliques(Graph graph, List<WorkUnitEdge> compromisedEdges) {
         this.graph = graph;
         vertexCount = (short) graph.getVertices().size();
         connectedVertices.clear();
-        cliques.clear();
+        cliqueCount = 0;
         Vertex v1;
         Vertex v2;
         EdgeColor color;
@@ -47,7 +47,7 @@ public class TargetedCliqueCheckService {
             connectedVertices.clear();
         }
 
-        return cliques;
+        return cliqueCount;
 
     }
 
@@ -61,7 +61,7 @@ public class TargetedCliqueCheckService {
                 connectedVertices.add(graph.getVertexById(i));
                 // If this and makes a completed clique add it to the clique collection
                 if (connectedVertices.size() == subgraphSize) {
-                    cliques.add(new Clique(new ArrayList<>(connectedVertices)));
+                    cliqueCount++;
                 }
                 // Otherwise if there are enough possible options left to form a clique proceed with
                 // search. Optimize by adding second condition above.
