@@ -16,13 +16,13 @@ public class TargetedCliqueCheckService {
     private Graph graph;
     private short vertexCount;
     private final List<Vertex> connectedVertices = new ArrayList<>();
-    private Integer cliqueCount;
+    private int cliqueCount;
 
     @Value("${ramsey.subgraph-size}")
     private Short subgraphSize;
 
 
-    public Integer getCliques(Graph graph, List<WorkUnitEdge> compromisedEdges) {
+    public int getCliques(Graph graph, List<WorkUnitEdge> compromisedEdges) {
         this.graph = graph;
         vertexCount = (short) graph.getVertices().size();
         connectedVertices.clear();

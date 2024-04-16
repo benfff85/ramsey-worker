@@ -55,7 +55,7 @@ public class TargetedWorkUnitProcessor implements WorkUnitProcessor {
             GraphUtil.flipEdges(graph, workUnit.getEdgesToFlip());
 
             log.debug("Checking for cliques in derived graph");
-            Integer derivedGraphCliqueCount = targetedCliqueCheckService.getCliques(graph, workUnit.getEdgesToFlip());
+            int derivedGraphCliqueCount = targetedCliqueCheckService.getCliques(graph, workUnit.getEdgesToFlip());
             enrichWorkUnit(derivedGraphCliqueCount, workUnit);
 
             log.debug("Reverting base graph");
@@ -72,7 +72,7 @@ public class TargetedWorkUnitProcessor implements WorkUnitProcessor {
         log.info("Clique count for base graph: {}", cliqueCollection.size());
     }
 
-    private void enrichWorkUnit(Integer derivedGraphCliqueCount, WorkUnitDto workUnit) {
+    private void enrichWorkUnit(int derivedGraphCliqueCount, WorkUnitDto workUnit) {
         log.debug("Enriching work unit with analysis results");
         Integer cliqueCount = (derivedGraphCliqueCount + cliqueCollection.size()) - cliqueCollection.getCountOfCliquesContainingEdges(workUnit.getEdgesToFlip());
 
