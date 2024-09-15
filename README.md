@@ -50,9 +50,10 @@ docker push benferenchak/ramsey-worker:dev
 
 Start a container using the image
 ```bash
-docker run --restart=always \
-  --name=ramsey-worker \
+docker run \
+  --name=ramsey-worker-1 \
   -e SPRING_PROFILES_ACTIVE=dev \
-  --cpus=8 \
+  -e WORK_UNIT_FETCH_COUNT=1000 \
+  -e WORK_UNIT_PUBLISH_COUNT=1000 \
   benferenchak/ramsey-worker:dev
 ```
