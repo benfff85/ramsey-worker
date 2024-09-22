@@ -40,19 +40,22 @@ For example, say we wanted to flip the edges `[100,110]` and `[200,210]`. With t
 
 Build the image using SpringBoot defaults
 ```bash
-mvn spring-boot:build-image -Dspring-boot.build-image.imageName=benferenchak/ramsey-worker:dev
+docker build -t benferenchak/ramsey-worker:develop .
 ````
 
 Publish the image to Dockerhub
 ```bash
-docker push benferenchak/ramsey-worker:dev
+docker push benferenchak/ramsey-worker:develop
 ```
 
 Start a container using the image
 ```bash
-docker run --restart=always \
-  --name=ramsey-worker \
+docker run \
+  --name=ramsey-worker-1 \
+  --network=ramsey-net \
+  --label com.docker.compose.project=ramsey \
   -e SPRING_PROFILES_ACTIVE=dev \
-  --cpus=8 \
-  benferenchak/ramsey-worker:dev
+  -e WORK_UNIT_FETCH_COUNT=1000 \
+  -e WORK_UNIT_PUBLISH_COUNT=1000 \
+  benferenchak/ramsey-worker:develop
 ```
