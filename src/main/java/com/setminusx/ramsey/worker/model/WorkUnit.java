@@ -1,9 +1,5 @@
-package com.setminusx.ramsey.worker.dto;
+package com.setminusx.ramsey.worker.model;
 
-import com.setminusx.ramsey.worker.model.WorkUnitAnalysisType;
-import com.setminusx.ramsey.worker.model.WorkUnitEdge;
-import com.setminusx.ramsey.worker.model.WorkUnitPriority;
-import com.setminusx.ramsey.worker.model.WorkUnitStatus;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -12,13 +8,14 @@ import java.util.List;
 @Data
 @Builder
 @ToString(onlyExplicitlyIncluded = true)
-public class WorkUnitDto {
+public class WorkUnit {
 
     @ToString.Include
     private Integer id;
     private Integer subgraphSize;
     private Integer vertexCount;
     private Integer baseGraphId;
+    private Integer stageId;
     @ToString.Include
     private List<WorkUnitEdge> edgesToFlip;
     private WorkUnitStatus status;

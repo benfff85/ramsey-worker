@@ -1,74 +1,48 @@
 package com.setminusx.ramsey.worker.service;
 
+import com.setminusx.ramsey.worker.client.MiddlewareClient;
+import com.setminusx.ramsey.worker.config.RamseyConfig;
 import com.setminusx.ramsey.worker.controller.ClientRegister;
-import com.setminusx.ramsey.worker.dto.WorkUnitDto;
+import com.setminusx.ramsey.worker.model.WorkUnit;
 import com.setminusx.ramsey.worker.model.WorkUnitStatus;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import jakarta.annotation.PostConstruct;
-
-import java.util.*;
-
-import static java.util.Objects.requireNonNull;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 @Slf4j
 @Service
 public class WorkUnitService {
 
-    @Value("${ramsey.work-unit.queue.url}")
-    private String workUnitUrl;
+    private final Integer fetchSize;
+    private final Integer publishSize;
+    private final String clientId;
 
-    @Value("${ramsey.work-unit.queue.fetch-size}")
-    private Integer fetchSize;
+    private final MiddlewareClient middlewareClient;
+    private final List<WorkUnit> workUnitsToPublish = new LinkedList<>();
 
-    @Value("${ramsey.work-unit.queue.publish-size}")
-    private Integer publishSize;
-
-    @Value("${ramsey.vertex-count}")
-    private Integer vertexCount;
-
-    @Value("${ramsey.subgraph-size}")
-    private Integer subgraphSize;
-
-    private final ClientRegister clientRegister;
-    private final RestTemplate restTemplate;
-    private String workUnitUri;
-
-    private final List<WorkUnitDto> workUnitsToPublish = new LinkedList<>();
-
-    public WorkUnitService(ClientRegister clientRegister, RestTemplate restTemplate) {
-        this.clientRegister = clientRegister;
-        this.restTemplate = restTemplate;
+    public WorkUnitService(ClientRegister clientRegister, RamseyConfig ramseyConfig, MiddlewareClient middlewareClient) {
+        this.middlewareClient = middlewareClient;
+        this.fetchSize = ramseyConfig.getWorkUnit().getQueue().getFetchSize();
+        this.publishSize = ramseyConfig.getWorkUnit().getQueue().getPublishSize();
+        this.clientId = ramseyConfig.getClientId();
     }
 
-    @PostConstruct
-    private void createUri() {
-        workUnitUri = UriComponentsBuilder.fromHttpUrl(workUnitUrl)
-                .queryParam("vertexCount", vertexCount)
-                .queryParam("subgraphSize", subgraphSize)
-                .queryParam("assignedClientId", clientRegister.getClientId())
-                .queryParam("pageSize", fetchSize)
-                .queryParam("status", WorkUnitStatus.ASSIGNED)
-                .toUriString();
-        log.info("URI for work unit fetch: {}", workUnitUri);
-    }
 
-    public List<WorkUnitDto> getWorkUnits() {
+    public List<WorkUnit> getWorkUnits() {
         log.info("Fetching work units, fetchSize: {}", fetchSize);
-        List<WorkUnitDto> workUnitDtos = Arrays.asList(requireNonNull(restTemplate.getForObject(workUnitUri, WorkUnitDto[].class)));
-        if (workUnitDtos.isEmpty()) {
+        List<WorkUnit> workUnits = middlewareClient.getWorkUnitsByAssignedClientAndStatus(clientId, WorkUnitStatus.ASSIGNED, fetchSize);
+        if (workUnits.isEmpty()) {
             log.info("No work units found");
             return Collections.emptyList();
         }
-        log.info("Work units fetched, count: {}", workUnitDtos.size());
-        return workUnitDtos;
+        log.info("Work units fetched, count: {}", workUnits.size());
+        return workUnits;
     }
 
-    public void publishBatch(WorkUnitDto workUnit) {
+    public void publishBatch(WorkUnit workUnit) {
         workUnitsToPublish.add(workUnit);
         if (workUnitsToPublish.size() >= publishSize) {
             flushPublishCache();
@@ -78,7 +52,7 @@ public class WorkUnitService {
     public void flushPublishCache() {
         if (!workUnitsToPublish.isEmpty()) {
             log.info("Saving work units, count: {}", workUnitsToPublish.size());
-            restTemplate.postForObject(UriComponentsBuilder.fromHttpUrl(workUnitUrl).toUriString(), workUnitsToPublish, WorkUnitDto[].class);
+            middlewareClient.updateWorkUnits(workUnitsToPublish);
             workUnitsToPublish.clear();
         }
     }

@@ -6,9 +6,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.http.RequestMethod;
 import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder;
-import com.setminusx.ramsey.worker.dto.ClientDto;
-import com.setminusx.ramsey.worker.dto.GraphDto;
-import com.setminusx.ramsey.worker.dto.WorkUnitDto;
+import com.setminusx.ramsey.worker.model.Client;
+import com.setminusx.ramsey.worker.model.Graph;
+import com.setminusx.ramsey.worker.model.WorkUnit;
 import com.setminusx.ramsey.worker.model.WorkUnitAnalysisType;
 import com.setminusx.ramsey.worker.model.WorkUnitEdge;
 import lombok.extern.slf4j.Slf4j;
@@ -59,7 +59,7 @@ class IntegrationTest {
                 .willReturn(aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                        .withBody(mapper.writeValueAsString(ClientDto.builder()
+                        .withBody(mapper.writeValueAsString(Client.builder()
                                 .type(CLIQUECHECKER)
                                 .status(ACTIVE)
                                 .vertexCount(288)
@@ -98,7 +98,7 @@ class IntegrationTest {
                 .willReturn(aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                        .withBody(mapper.writeValueAsString(GraphDto.builder()
+                        .withBody(mapper.writeValueAsString(Graph.builder()
                                 .graphId(1)
                                 .subgraphSize(8)
                                 .vertexCount(288)
@@ -108,8 +108,8 @@ class IntegrationTest {
 
     }
 
-    public static WorkUnitDto createWorkUnitDto(Integer id, int v1, int v2, int v3, int v4, WorkUnitAnalysisType workUnitAnalysisType) {
-        return WorkUnitDto.builder()
+    public static WorkUnit createWorkUnitDto(Integer id, int v1, int v2, int v3, int v4, WorkUnitAnalysisType workUnitAnalysisType) {
+        return WorkUnit.builder()
                 .id(id)
                 .baseGraphId(1)
                 .subgraphSize(8)
@@ -127,13 +127,13 @@ class IntegrationTest {
     @Test
     void testWorkUnitProcessing() {
 
-        List<WorkUnitDto> publishedWorkUnits = new LinkedList<>();
+        List<WorkUnit> publishedWorkUnits = new LinkedList<>();
         while (publishedWorkUnits.isEmpty()) {
             wireMockServer.findAll(RequestPatternBuilder.allRequests())
                     .forEach(request -> {
                         if (request.getMethod().equals(RequestMethod.POST) && request.getUrl().equals("/api/ramsey/work-units")) {
                             try {
-                                publishedWorkUnits.addAll(asList(mapper.readValue(request.getBodyAsString(), WorkUnitDto[].class)));
+                                publishedWorkUnits.addAll(asList(mapper.readValue(request.getBodyAsString(), WorkUnit[].class)));
                             } catch (JsonProcessingException e) {
                                 throw new RuntimeException(e);
                             }

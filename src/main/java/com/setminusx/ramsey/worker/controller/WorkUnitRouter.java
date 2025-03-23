@@ -1,6 +1,6 @@
 package com.setminusx.ramsey.worker.controller;
 
-import com.setminusx.ramsey.worker.dto.WorkUnitDto;
+import com.setminusx.ramsey.worker.model.WorkUnit;
 import com.setminusx.ramsey.worker.model.WorkUnitAnalysisType;
 import com.setminusx.ramsey.worker.service.WorkUnitService;
 import lombok.extern.slf4j.Slf4j;
@@ -19,10 +19,10 @@ import static com.setminusx.ramsey.worker.model.WorkUnitAnalysisType.*;
 public class WorkUnitRouter {
 
     private final WorkUnitService workUnitService;
-    private final Queue<WorkUnitDto> workUnits;
+    private final Queue<WorkUnit> workUnits;
     private final Map<WorkUnitAnalysisType, WorkUnitProcessor> processorMap;
 
-    public WorkUnitRouter(WorkUnitService workUnitService, TargetedWorkUnitProcessor targetedWorkUnitProcessor, ComprehensiveWorkUnitProcessor comprehensiveWorkUnitProcessor, NaiveWorkUnitProcessor naiveWorkUnitProcessor, @Qualifier("workUnitQueue") Queue<WorkUnitDto> workUnits) {
+    public WorkUnitRouter(WorkUnitService workUnitService, TargetedWorkUnitProcessor targetedWorkUnitProcessor, ComprehensiveWorkUnitProcessor comprehensiveWorkUnitProcessor, NaiveWorkUnitProcessor naiveWorkUnitProcessor, @Qualifier("workUnitQueue") Queue<WorkUnit> workUnits) {
         this.workUnitService = workUnitService;
         this.workUnits = workUnits;
         this.processorMap = Map.of(
@@ -40,7 +40,7 @@ public class WorkUnitRouter {
             return;
         }
 
-        WorkUnitDto workUnit;
+        WorkUnit workUnit;
         while (!workUnits.isEmpty()) {
             workUnit = workUnits.poll();
             processorMap.get(workUnit.getWorkUnitAnalysisType()).process(workUnit);

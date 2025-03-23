@@ -1,8 +1,9 @@
 package com.setminusx.ramsey.worker.service;
 
+import com.setminusx.ramsey.worker.config.RamseyConfig;
 import com.setminusx.ramsey.worker.model.*;
+import com.setminusx.ramsey.worker.utility.UtilityGraph;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -13,18 +14,20 @@ import java.util.List;
 @Component
 public class TargetedCliqueCheckService {
 
-    private Graph graph;
+    private UtilityGraph utilityGraph;
     private short vertexCount;
     private final List<Vertex> connectedVertices = new ArrayList<>();
     private int cliqueCount;
+    private final Short subgraphSize;
 
-    @Value("${ramsey.subgraph-size}")
-    private Short subgraphSize;
+    public TargetedCliqueCheckService(RamseyConfig ramseyConfig) {
+        this.subgraphSize = ramseyConfig.getSubgraphSize();
+    }
 
 
-    public int getCliques(Graph graph, List<WorkUnitEdge> compromisedEdges) {
-        this.graph = graph;
-        vertexCount = (short) graph.getVertices().size();
+    public int getCliques(UtilityGraph utilityGraph, List<WorkUnitEdge> compromisedEdges) {
+        this.utilityGraph = utilityGraph;
+        vertexCount = (short) utilityGraph.getVertices().size();
         connectedVertices.clear();
         cliqueCount = 0;
         Vertex v1;
@@ -32,12 +35,12 @@ public class TargetedCliqueCheckService {
         EdgeColor color;
 
         for (WorkUnitEdge compromisedEdge : compromisedEdges) {
-            v1 = graph.getVertexById(compromisedEdge.getVertexOne());
-            v2 = graph.getVertexById(compromisedEdge.getVertexTwo());
+            v1 = utilityGraph.getVertexById(compromisedEdge.getVertexOne());
+            v2 = utilityGraph.getVertexById(compromisedEdge.getVertexTwo());
             color = v1.getEdgeColor(v2);
             connectedVertices.add(v1);
             connectedVertices.add(v2);
-            for (Vertex v3 : graph.getVertices()) {
+            for (Vertex v3 : utilityGraph.getVertices()) {
                 if (!v3.equals(v1) && !v3.equals(v2) && color.equals(v3.getEdgeColor(v1)) && color.equals(v3.getEdgeColor(v2))) {
                     connectedVertices.add(v3);
                     findCliqueRecursive(connectedVertices, color);
@@ -57,8 +60,8 @@ public class TargetedCliqueCheckService {
         // Loop through all vertices starting with the one after the last vertex in the chain
         for (short i = (short) (connectedVertices.getLast().getId() + 1); i < vertexCount; i++) {
             // If the vertex being considered is connected
-            if (i != connectedVertices.get(0).getId() && i != connectedVertices.get(1).getId() && isConnected(connectedVertices, graph.getVertexById(i), color)) {
-                connectedVertices.add(graph.getVertexById(i));
+            if (i != connectedVertices.get(0).getId() && i != connectedVertices.get(1).getId() && isConnected(connectedVertices, utilityGraph.getVertexById(i), color)) {
+                connectedVertices.add(utilityGraph.getVertexById(i));
                 // If this and makes a completed clique add it to the clique collection
                 if (connectedVertices.size() == subgraphSize) {
                     cliqueCount++;
@@ -69,7 +72,7 @@ public class TargetedCliqueCheckService {
                     findCliqueRecursive(connectedVertices, color);
                 }
                 // Remove this vertex from the chain and try the next at this level
-                connectedVertices.remove(graph.getVertexById(i));
+                connectedVertices.remove(utilityGraph.getVertexById(i));
             }
         }
         // Once all have been tried at this level return

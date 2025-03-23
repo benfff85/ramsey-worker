@@ -1,7 +1,5 @@
-package com.setminusx.ramsey.worker.dto;
+package com.setminusx.ramsey.worker.model;
 
-import com.setminusx.ramsey.worker.model.ClientStatus;
-import com.setminusx.ramsey.worker.model.ClientType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,11 +11,12 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClientDto {
+public class Client {
 
     private String clientId;
     private Integer subgraphSize;
     private Integer vertexCount;
+    private Integer campaignId;
     private ClientType type;
     private ClientStatus status;
     private LocalDateTime createdDate;

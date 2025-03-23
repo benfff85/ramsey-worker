@@ -1,16 +1,15 @@
 package com.setminusx.ramsey.worker.controller;
 
-import com.setminusx.ramsey.worker.dto.GraphDto;
-import com.setminusx.ramsey.worker.dto.WorkUnitDto;
-import com.setminusx.ramsey.worker.model.Clique;
+import com.setminusx.ramsey.worker.client.MiddlewareClient;
+import com.setminusx.ramsey.worker.config.RamseyConfig;
 import com.setminusx.ramsey.worker.model.Graph;
+import com.setminusx.ramsey.worker.model.WorkUnit;
+import com.setminusx.ramsey.worker.model.Clique;
+import com.setminusx.ramsey.worker.utility.UtilityGraph;
 import com.setminusx.ramsey.worker.model.WorkUnitStatus;
-import com.setminusx.ramsey.worker.service.GraphService;
 import com.setminusx.ramsey.worker.service.NaiveCliqueCheckService;
-import com.setminusx.ramsey.worker.utility.GraphUtil;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -22,44 +21,44 @@ import static com.setminusx.ramsey.worker.utility.TimeUtility.now;
 @Component
 public class NaiveWorkUnitProcessor implements WorkUnitProcessor {
 
-    @Value("${ramsey.vertex-count}")
-    private Short vertexCount;
-    private final GraphService graphService;
     private final NaiveCliqueCheckService naiveCliqueCheckService;
-    private Graph graph;
+    private final RamseyConfig ramseyConfig;
+    private final MiddlewareClient middlewareClient;
+    private UtilityGraph utilityGraph;
 
 
-    public NaiveWorkUnitProcessor(GraphService graphService, NaiveCliqueCheckService naiveCliqueCheckService) {
-        this.graphService = graphService;
+    public NaiveWorkUnitProcessor(NaiveCliqueCheckService naiveCliqueCheckService, RamseyConfig ramseyConfig, MiddlewareClient middlewareClient) {
         this.naiveCliqueCheckService = naiveCliqueCheckService;
+        this.middlewareClient = middlewareClient;
+        this.ramseyConfig = ramseyConfig;
     }
 
     @PostConstruct
     public void init() {
-        graph = new Graph(vertexCount);
+        utilityGraph = new UtilityGraph(ramseyConfig.getVertexCount());
     }
 
     @Override
-    public void process(WorkUnitDto workUnit) {
+    public void process(WorkUnit workUnit) {
             log.info("Processing WorkUnit: {}", workUnit);
 
-            if (!workUnit.getBaseGraphId().equals(graph.getId())) {
-                GraphDto graphDto = graphService.getGraphById(workUnit.getBaseGraphId());
-                graph.applyColoring(graphDto.getEdgeData(), graphDto.getGraphId());
+            if (!workUnit.getBaseGraphId().equals(utilityGraph.getId())) {
+                Graph graph = middlewareClient.getGraphById(workUnit.getBaseGraphId());
+                utilityGraph.applyColoring(graph.getEdgeData(), graph.getGraphId());
             }
             workUnit.setProcessingStartedDate(now());
 
             log.debug("Flipping edges");
-            GraphUtil.flipEdges(graph, workUnit.getEdgesToFlip());
+            utilityGraph.flipsEdges(workUnit.getEdgesToFlip());
 
             log.debug("Checking for cliques in derived graph");
-            List<Clique> derivedGraphCliques = naiveCliqueCheckService.getCliques(graph);
+            List<Clique> derivedGraphCliques = naiveCliqueCheckService.getCliques(utilityGraph);
             workUnit.setCliqueCount(derivedGraphCliques.size());
             workUnit.setCompletedDate(now());
             workUnit.setStatus(WorkUnitStatus.COMPLETE);
 
             log.debug("Reverting base graph");
-            GraphUtil.flipEdges(graph, workUnit.getEdgesToFlip());
+            utilityGraph.flipsEdges(workUnit.getEdgesToFlip());
 
     }
 

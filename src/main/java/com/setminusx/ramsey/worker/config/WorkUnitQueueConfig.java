@@ -1,6 +1,6 @@
 package com.setminusx.ramsey.worker.config;
 
-import com.setminusx.ramsey.worker.dto.WorkUnitDto;
+import com.setminusx.ramsey.worker.model.WorkUnit;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -11,7 +11,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class WorkUnitQueueConfig {
 
     @Bean(name = "workUnitQueue")
-    public Queue<WorkUnitDto> linkedBlockingQueue() {
+    public Queue<WorkUnit> linkedBlockingQueue() {
         return new LinkedBlockingQueue<>();
     }
 

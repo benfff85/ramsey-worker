@@ -13,7 +13,8 @@ public class RestTemplateConfig {
 
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder builder) {
-        return builder.interceptors(List.of(new ContentTypeInterceptor())).build();
+//        return builder.interceptors(List.of(new ContentTypeInterceptor())).build();
+        return new RestTemplate();
     }
 
 }
