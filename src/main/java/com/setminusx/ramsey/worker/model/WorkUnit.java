@@ -12,8 +12,6 @@ public class WorkUnit {
 
     @ToString.Include
     private Integer id;
-    private Integer subgraphSize;
-    private Integer vertexCount;
     private Integer baseGraphId;
     private Integer stageId;
     @ToString.Include

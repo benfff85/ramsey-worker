@@ -1,10 +1,12 @@
 package com.setminusx.ramsey.worker.model;
 
+import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Data
+@Builder
 public class Campaign {
 
     private Integer campaignId;

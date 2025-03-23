@@ -1,6 +1,5 @@
 ramsey:
   mw:
-#    host: "https://api.setminusx.com"
     host: "http://localhost:8080"
   client:
     url: ${ramsey.mw.host}/api/ramsey/clients
@@ -16,3 +15,7 @@ ramsey:
       url: ${ramsey.mw.host}/api/ramsey/work-units
       fetch-size: ${WORK_UNIT_FETCH_COUNT:100}
       publish-size: ${WORK_UNIT_PUBLISH_COUNT:50}
+  campaign:
+    url: ${ramsey.mw.host}/api/ramsey/campaigns
+  stage:
+    url: ${ramsey.mw.host}/api/ramsey/stages

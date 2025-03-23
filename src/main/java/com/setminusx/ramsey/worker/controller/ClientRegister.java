@@ -42,8 +42,6 @@ public class ClientRegister {
 
         client = Client.builder()
                 .campaignId(campaignId)
-                .subgraphSize(Integer.valueOf(ramseyConfig.getSubgraphSize()))
-                .vertexCount(Integer.valueOf(ramseyConfig.getVertexCount()))
                 .type(ClientType.CLIQUECHECKER)
                 .status(ACTIVE)
                 .createdDate(now())
