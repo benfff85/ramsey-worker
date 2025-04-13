@@ -1,6 +1,6 @@
 ramsey:
   mw:
-    host: "http://ramsey-mw:8080"
+    host: ${MW_HOST:"http://ramsey-mw:8080"}
   client:
     url: ${ramsey.mw.host}/api/ramsey/clients
     registration:
