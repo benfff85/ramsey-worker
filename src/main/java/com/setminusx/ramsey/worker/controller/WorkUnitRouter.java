@@ -33,22 +33,22 @@ public class WorkUnitRouter {
 
     @Scheduled(fixedDelayString = "${ramsey.work-unit.router.frequency-in-millis}")
     public void process() {
+        while (true) {
+            workUnits.addAll(workUnitService.getWorkUnits());
+            if (workUnits.isEmpty()) {
+                log.warn("Worker out of work, sleeping and trying again. Consider increasing the work unit creation rate.");
+                return;
+            }
 
-        workUnits.addAll(workUnitService.getWorkUnits());
-        if(workUnits.isEmpty()) {
-            log.warn("Worker out of work, sleeping and trying again. Consider increasing the work unit creation rate.");
-            return;
+            WorkUnit workUnit;
+            while (!workUnits.isEmpty()) {
+                workUnit = workUnits.poll();
+                processorMap.get(workUnit.getWorkUnitAnalysisType()).process(workUnit);
+                workUnitService.publishBatch(workUnit);
+            }
+
+            workUnitService.flushPublishCache();
         }
-
-        WorkUnit workUnit;
-        while (!workUnits.isEmpty()) {
-            workUnit = workUnits.poll();
-            processorMap.get(workUnit.getWorkUnitAnalysisType()).process(workUnit);
-            workUnitService.publishBatch(workUnit);
-        }
-
-        workUnitService.flushPublishCache();
-
     }
 
 }
