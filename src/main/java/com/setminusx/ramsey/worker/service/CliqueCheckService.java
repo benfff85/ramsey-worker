@@ -1,10 +1,12 @@
 package com.setminusx.ramsey.worker.service;
 
+import com.setminusx.ramsey.worker.config.EnablePerfLogging;
 import com.setminusx.ramsey.worker.config.RamseyConfig;
 import com.setminusx.ramsey.worker.model.Clique;
 import com.setminusx.ramsey.worker.model.EdgeColor;
 import com.setminusx.ramsey.worker.utility.UtilityGraph;
 import com.setminusx.ramsey.worker.model.Vertex;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -27,6 +29,7 @@ public class CliqueCheckService {
     }
 
 
+    @EnablePerfLogging
     public List<Clique> getCliques(UtilityGraph utilityGraph) {
         this.utilityGraph = utilityGraph;
         vertexCount = (short) utilityGraph.getVertices().size();
