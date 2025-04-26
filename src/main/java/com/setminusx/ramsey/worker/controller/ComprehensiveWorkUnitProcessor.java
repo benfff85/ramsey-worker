@@ -2,7 +2,7 @@ package com.setminusx.ramsey.worker.controller;
 
 import com.setminusx.ramsey.worker.client.MiddlewareClient;
 import com.setminusx.ramsey.worker.model.*;
-import com.setminusx.ramsey.worker.service.CliqueCheckServiceComprehensiveBitSet;
+import com.setminusx.ramsey.worker.service.ComprehensiveCliqueCheckService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -19,10 +19,10 @@ import static com.setminusx.ramsey.worker.utility.TimeUtility.now;
 @Component
 public class ComprehensiveWorkUnitProcessor implements WorkUnitProcessor {
 
-    private final CliqueCheckServiceComprehensiveBitSet cliqueCheckService;
+    private final ComprehensiveCliqueCheckService cliqueCheckService;
     private final MiddlewareClient middlewareClient;
 
-    public ComprehensiveWorkUnitProcessor(CliqueCheckServiceComprehensiveBitSet cliqueCheckService, MiddlewareClient middlewareClient) {
+    public ComprehensiveWorkUnitProcessor(ComprehensiveCliqueCheckService cliqueCheckService, MiddlewareClient middlewareClient) {
         this.cliqueCheckService = cliqueCheckService;
         this.middlewareClient = middlewareClient;
     }

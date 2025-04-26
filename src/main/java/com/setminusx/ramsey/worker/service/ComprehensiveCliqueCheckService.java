@@ -9,10 +9,10 @@ import java.util.BitSet;
 import java.util.List;
 
 @Component
-public class CliqueCheckServiceComprehensiveBitSet {
+public class ComprehensiveCliqueCheckService {
     private final Short subgraphSize;
 
-    public CliqueCheckServiceComprehensiveBitSet(RamseyConfig ramseyConfig) {
+    public ComprehensiveCliqueCheckService(RamseyConfig ramseyConfig) {
         this.subgraphSize = ramseyConfig.getSubgraphSize();
     }
 
