@@ -6,7 +6,6 @@ import com.setminusx.ramsey.worker.model.Clique;
 import com.setminusx.ramsey.worker.model.EdgeColor;
 import com.setminusx.ramsey.worker.utility.UtilityGraph;
 import com.setminusx.ramsey.worker.model.Vertex;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

@@ -68,7 +68,6 @@ public class ComprehensiveWorkUnitProcessor implements WorkUnitProcessor {
 
         log.debug("Checking for cliques in derived graph");
         List<Vertex> vertices = utilityGraph.getVertices();
-        int n = vertices.size();
         BitSet[] redAdjacency = buildAdjacencyMatrix(vertices, EdgeColor.RED);
         BitSet[] blueAdjacency = buildAdjacencyMatrix(vertices, EdgeColor.BLUE);
         List<Clique> derivedGraphCliques = new ArrayList<>();
