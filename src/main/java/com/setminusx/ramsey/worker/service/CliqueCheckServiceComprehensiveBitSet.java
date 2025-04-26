@@ -19,15 +19,34 @@ public class CliqueCheckServiceComprehensiveBitSet {
     @EnablePerfLogging
     public List<List<Integer>> getCliques(int vertexCount, BitSet[] adjacency) {
         List<List<Integer>> cliques = new ArrayList<>();
+        // RED cliques
         BitSet R = new BitSet(vertexCount);
         BitSet P = new BitSet(vertexCount);
         BitSet X = new BitSet(vertexCount);
         P.set(0, vertexCount);
-        bronKerbosch(R, P, X, adjacency, cliques, vertexCount);
+        bronKerbosch(R, P, X, adjacency, cliques);
+        // BLUE cliques (inverted adjacency)
+        BitSet[] inverted = invertAdjacencyMatrix(adjacency);
+        R.clear(); P.set(0, vertexCount); X.clear();
+        bronKerbosch(R, P, X, inverted, cliques);
         return cliques;
     }
 
-    private void bronKerbosch(BitSet R, BitSet P, BitSet X, BitSet[] adjacency, List<List<Integer>> cliques, int vertexCount) {
+    private BitSet[] invertAdjacencyMatrix(BitSet[] adjacency) {
+        int n = adjacency.length;
+        BitSet[] inverted = new BitSet[n];
+        for (int i = 0; i < n; i++) {
+            inverted[i] = new BitSet(n);
+            for (int j = 0; j < n; j++) {
+                if (i != j && !adjacency[i].get(j)) {
+                    inverted[i].set(j);
+                }
+            }
+        }
+        return inverted;
+    }
+
+    private void bronKerbosch(BitSet R, BitSet P, BitSet X, BitSet[] adjacency, List<List<Integer>> cliques) {
         if (R.cardinality() == subgraphSize) {
             List<Integer> cliqueVertices = new ArrayList<>();
             for (int v = R.nextSetBit(0); v >= 0; v = R.nextSetBit(v + 1)) {
@@ -43,7 +62,7 @@ public class CliqueCheckServiceComprehensiveBitSet {
             R.set(v);
             BitSet newP = (BitSet) P.clone();
             newP.and(adjacency[v]);
-            bronKerbosch(R, newP, X, adjacency, cliques, vertexCount);
+            bronKerbosch(R, newP, X, adjacency, cliques);
             R.clear(v);
             P.clear(v);
             X.set(v);

@@ -6,7 +6,6 @@ import com.setminusx.ramsey.worker.service.CliqueCheckServiceComprehensiveBitSet
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
 
@@ -46,20 +45,6 @@ public class ComprehensiveWorkUnitProcessor implements WorkUnitProcessor {
         return adjacency;
     }
 
-    private BitSet[] invertAdjacencyMatrix(BitSet[] adjacency) {
-        int n = adjacency.length;
-        BitSet[] inverted = new BitSet[n];
-        for (int i = 0; i < n; i++) {
-            inverted[i] = new BitSet(n);
-            for (int j = 0; j < n; j++) {
-                if (i != j && !adjacency[i].get(j)) {
-                    inverted[i].set(j);
-                }
-            }
-        }
-        return inverted;
-    }
-
     @Override
     public void process(WorkUnit workUnit) {
         log.info("Processing WorkUnit: {}", workUnit);
@@ -80,12 +65,7 @@ public class ComprehensiveWorkUnitProcessor implements WorkUnitProcessor {
         String flippedEdgeData = new String(edgeDataArr);
 
         BitSet[] redAdjacency = buildAdjacencyMatrixFromEdgeData(flippedEdgeData, vertexCount);
-        BitSet[] blueAdjacency = invertAdjacencyMatrix(redAdjacency);
-
-        List<List<Integer>> derivedGraphCliques = new ArrayList<>();
-        derivedGraphCliques.addAll(cliqueCheckService.getCliques(vertexCount, redAdjacency));
-        derivedGraphCliques.addAll(cliqueCheckService.getCliques(vertexCount, blueAdjacency));
-
+        List<List<Integer>> derivedGraphCliques = cliqueCheckService.getCliques(vertexCount, redAdjacency);
         log.info("Clique count for derived graph: {}", derivedGraphCliques.size());
         workUnit.setCliqueCount(derivedGraphCliques.size());
         workUnit.setCompletedDate(now());
