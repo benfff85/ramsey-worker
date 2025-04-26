@@ -26,24 +26,21 @@ public class CliqueCheckServiceComprehensiveBitSet {
         P.set(0, vertexCount);
         bronKerbosch(R, P, X, adjacency, cliques);
         // BLUE cliques (inverted adjacency)
-        BitSet[] inverted = invertAdjacencyMatrix(adjacency);
+        invertAdjacencyMatrixInPlace(adjacency);
         R.clear(); P.set(0, vertexCount); X.clear();
-        bronKerbosch(R, P, X, inverted, cliques);
+        bronKerbosch(R, P, X, adjacency, cliques);
         return cliques;
     }
 
-    private BitSet[] invertAdjacencyMatrix(BitSet[] adjacency) {
+    private void invertAdjacencyMatrixInPlace(BitSet[] adjacency) {
         int n = adjacency.length;
-        BitSet[] inverted = new BitSet[n];
         for (int i = 0; i < n; i++) {
-            inverted[i] = new BitSet(n);
             for (int j = 0; j < n; j++) {
-                if (i != j && !adjacency[i].get(j)) {
-                    inverted[i].set(j);
+                if (i != j) {
+                    adjacency[i].flip(j);
                 }
             }
         }
-        return inverted;
     }
 
     private void bronKerbosch(BitSet R, BitSet P, BitSet X, BitSet[] adjacency, List<List<Integer>> cliques) {
