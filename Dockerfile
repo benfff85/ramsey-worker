@@ -15,7 +15,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Use a smaller JRE image for runtime
-FROM eclipse-temurin:21-jre-alpine AS final
+FROM eclipse-temurin:21-jre AS final
 
 # Set the working directory
 WORKDIR /app
