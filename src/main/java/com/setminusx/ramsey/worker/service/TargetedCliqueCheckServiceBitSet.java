@@ -3,15 +3,17 @@ package com.setminusx.ramsey.worker.service;
 import com.setminusx.ramsey.worker.config.EnablePerfLogging;
 import com.setminusx.ramsey.worker.model.EdgeMappedCliqueCollectionBitSet;
 import com.setminusx.ramsey.worker.model.WorkUnitEdge;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+@Slf4j
 @Service
 public class TargetedCliqueCheckServiceBitSet {
 
     // In-place inversion: flips all off-diagonal bits in the adjacency matrix
-    private void invertAdjacencyMatrixInPlace(BitSet[] adjacency) {
+    public void invertAdjacencyMatrixInPlace(BitSet[] adjacency) {
         int n = adjacency.length;
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
@@ -23,13 +25,9 @@ public class TargetedCliqueCheckServiceBitSet {
     }
 
     @EnablePerfLogging
-    // Main method for a derived graph: count new cliques containing a flipped edge, but only those not in the base graph
+    // Main method for a derived graph: count new cliques containing a flipped edge, by starting recursion with the two vertices of each flipped edge
     public int getNewCliques(BitSet[] derivedAdjacency, int vertexCount, int cliqueSize, List<WorkUnitEdge> flippedEdges, EdgeMappedCliqueCollectionBitSet baseCliqueCollection) {
-        Set<String> baseCliqueSet = new HashSet<>();
-        for (List<Integer> clique : baseCliqueCollection.getCliquesAsVertexIdLists()) {
-            baseCliqueSet.add(cliqueKey(clique));
-        }
-        Set<String> foundNewCliques = new HashSet<>();
+        int newCliqueCount = 0;
         // RED (current adjacency)
         for (WorkUnitEdge edge : flippedEdges) {
             int v1 = edge.getVertexOne();
@@ -41,7 +39,7 @@ public class TargetedCliqueCheckServiceBitSet {
                 P.and(derivedAdjacency[v2]);
                 P.clear(v1); P.clear(v2);
                 BitSet X = new BitSet(vertexCount);
-                bronKerboschNewCliques(R, P, X, derivedAdjacency, foundNewCliques, baseCliqueSet, cliqueSize);
+                newCliqueCount += bronKerboschCount(R, P, X, derivedAdjacency, cliqueSize);
             }
         }
         // BLUE (inverted adjacency)
@@ -56,41 +54,32 @@ public class TargetedCliqueCheckServiceBitSet {
                 P.and(derivedAdjacency[v2]);
                 P.clear(v1); P.clear(v2);
                 BitSet X = new BitSet(vertexCount);
-                bronKerboschNewCliques(R, P, X, derivedAdjacency, foundNewCliques, baseCliqueSet, cliqueSize);
+                newCliqueCount += bronKerboschCount(R, P, X, derivedAdjacency, cliqueSize);
             }
         }
         // Restore adjacency to original (invert again)
         invertAdjacencyMatrixInPlace(derivedAdjacency);
-        return foundNewCliques.size();
+        return newCliqueCount;
     }
 
-    // Helper: Bron-Kerbosch for new cliques only
-    private void bronKerboschNewCliques(BitSet R, BitSet P, BitSet X, BitSet[] adjacency, Set<String> foundNewCliques, Set<String> baseCliqueSet, int cliqueSize) {
+    // Bron-Kerbosch variant: returns count of cliques of size k found from R
+    private int bronKerboschCount(BitSet R, BitSet P, BitSet X, BitSet[] adjacency, int cliqueSize) {
         if (R.cardinality() == cliqueSize) {
-            List<Integer> clique = new ArrayList<>();
-            for (int v = R.nextSetBit(0); v >= 0; v = R.nextSetBit(v + 1)) clique.add(v);
-            String key = cliqueKey(clique);
-            if (!baseCliqueSet.contains(key)) foundNewCliques.add(key);
-            return;
+            return 1;
         }
-        if (R.cardinality() + P.cardinality() < cliqueSize) return;
-        if (P.isEmpty()) return;
+        if (R.cardinality() + P.cardinality() < cliqueSize) return 0;
+        if (P.isEmpty()) return 0;
+        int count = 0;
         BitSet candidates = (BitSet) P.clone();
         for (int v = candidates.nextSetBit(0); v >= 0; v = candidates.nextSetBit(v + 1)) {
             R.set(v);
             BitSet newP = (BitSet) P.clone();
             newP.and(adjacency[v]);
-            bronKerboschNewCliques(R, newP, X, adjacency, foundNewCliques, baseCliqueSet, cliqueSize);
+            count += bronKerboschCount(R, newP, X, adjacency, cliqueSize);
             R.clear(v);
             P.clear(v);
             X.set(v);
         }
-    }
-
-    // Helper: canonical string key for a clique (sorted vertex ids)
-    private String cliqueKey(List<Integer> clique) {
-        List<Integer> sorted = new ArrayList<>(clique);
-        Collections.sort(sorted);
-        return sorted.toString();
+        return count;
     }
 }
