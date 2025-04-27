@@ -1,7 +1,6 @@
 package com.setminusx.ramsey.worker.service;
 
 import com.setminusx.ramsey.worker.config.EnablePerfLogging;
-import com.setminusx.ramsey.worker.model.EdgeMappedCliqueCollectionBitSet;
 import com.setminusx.ramsey.worker.model.WorkUnitEdge;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,7 +25,7 @@ public class TargetedCliqueCheckServiceBitSet {
 
     @EnablePerfLogging
     // Main method for a derived graph: count new cliques containing a flipped edge, by starting recursion with the two vertices of each flipped edge
-    public int getNewCliques(BitSet[] derivedAdjacency, int vertexCount, int cliqueSize, List<WorkUnitEdge> flippedEdges, EdgeMappedCliqueCollectionBitSet baseCliqueCollection) {
+    public int getNewCliques(BitSet[] derivedAdjacency, int vertexCount, int cliqueSize, List<WorkUnitEdge> flippedEdges) {
         int newCliqueCount = 0;
         // RED (current adjacency)
         for (WorkUnitEdge edge : flippedEdges) {

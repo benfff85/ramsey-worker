@@ -64,8 +64,7 @@ public class TargetedWorkUnitProcessorBitSet implements WorkUnitProcessor {
                 derivedAdjacency,
                 baseVertexCount,
                 ramseyConfig.getSubgraphSize(),
-                workUnit.getEdgesToFlip(),
-                cliqueCollection
+                workUnit.getEdgesToFlip()
         );
         int cliqueCount = cliqueCollection.size() - brokenCliques + newCliques;
         enrichWorkUnit(cliqueCount, workUnit);
