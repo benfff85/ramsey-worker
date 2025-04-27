@@ -22,7 +22,7 @@ public class WorkUnitRouter {
     private final Queue<WorkUnit> workUnits;
     private final Map<WorkUnitAnalysisType, WorkUnitProcessor> processorMap;
 
-    public WorkUnitRouter(WorkUnitService workUnitService, TargetedWorkUnitProcessor targetedWorkUnitProcessor, ComprehensiveWorkUnitProcessor comprehensiveWorkUnitProcessor, NaiveWorkUnitProcessor naiveWorkUnitProcessor, @Qualifier("workUnitQueue") Queue<WorkUnit> workUnits) {
+    public WorkUnitRouter(WorkUnitService workUnitService, TargetedWorkUnitProcessorBitSet targetedWorkUnitProcessor, ComprehensiveWorkUnitProcessor comprehensiveWorkUnitProcessor, NaiveWorkUnitProcessor naiveWorkUnitProcessor, @Qualifier("workUnitQueue") Queue<WorkUnit> workUnits) {
         this.workUnitService = workUnitService;
         this.workUnits = workUnits;
         this.processorMap = Map.of(
