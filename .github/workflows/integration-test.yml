@@ -13,10 +13,20 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin' # See 'Supported distributions' for available options
-        java-version: '21'
+    - name: Download Eclipse Temurin JDK 24
+      run: |
+            DOWNLOAD_URL=$(curl -sL https://api.github.com/repos/adoptium/temurin24-binaries/releases/latest | \
+              grep "browser_download_url" | grep "jdk_x64_linux_hotspot" | grep ".tar.gz" | cut -d '"' -f 4 | head -n 1)
+            if [ -z "$DOWNLOAD_URL" ]; then
+              echo "Could not find a suitable JDK 24 binary download URL."
+              exit 1
+            fi
+            echo "Download URL: $DOWNLOAD_URL"
+            wget -O openjdk24.tar.gz "$DOWNLOAD_URL"
+            tar -xzf openjdk24.tar.gz
+            JAVA_DIR=$(tar -tf openjdk24.tar.gz | head -1 | cut -f1 -d"/")
+            echo "JAVA_HOME=$PWD/$JAVA_DIR" >> $GITHUB_ENV
+            echo "$PWD/$JAVA_DIR/bin" >> $GITHUB_PATH
     - name: Maven Version Check
       run: mvn -v
     - name: Maven Integration Test
