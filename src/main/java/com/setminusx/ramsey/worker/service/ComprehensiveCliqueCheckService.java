@@ -1,7 +1,7 @@
 package com.setminusx.ramsey.worker.service;
 
-import com.setminusx.ramsey.worker.config.EnablePerfLogging;
 import com.setminusx.ramsey.worker.config.RamseyConfig;
+import com.setminusx.ramsey.worker.utility.BitSetMatrixUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -16,7 +16,6 @@ public class ComprehensiveCliqueCheckService {
         this.subgraphSize = ramseyConfig.getSubgraphSize();
     }
 
-    @EnablePerfLogging
     public List<List<Integer>> getCliques(int vertexCount, BitSet[] adjacency) {
         List<List<Integer>> cliques = new ArrayList<>();
         // RED cliques
@@ -26,21 +25,10 @@ public class ComprehensiveCliqueCheckService {
         P.set(0, vertexCount);
         bronKerbosch(R, P, X, adjacency, cliques);
         // BLUE cliques (inverted adjacency)
-        invertAdjacencyMatrixInPlace(adjacency);
+        BitSetMatrixUtils.invertAdjacencyMatrixInPlace(adjacency);
         R.clear(); P.set(0, vertexCount); X.clear();
         bronKerbosch(R, P, X, adjacency, cliques);
         return cliques;
-    }
-
-    private void invertAdjacencyMatrixInPlace(BitSet[] adjacency) {
-        int n = adjacency.length;
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                if (i != j) {
-                    adjacency[i].flip(j);
-                }
-            }
-        }
     }
 
     private void bronKerbosch(BitSet R, BitSet P, BitSet X, BitSet[] adjacency, List<List<Integer>> cliques) {
