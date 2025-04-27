@@ -24,7 +24,7 @@ WORKDIR /app
 COPY --from=build /app/target/ramsey-worker-*.jar /app/ramsey-worker.jar
 
 # Add a non-root user and switch to it
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+RUN groupadd -r appgroup && useradd -r -g appgroup appuser
 USER appuser
 
 # Specify the command to run the application with JAVA_OPTS from the environment
