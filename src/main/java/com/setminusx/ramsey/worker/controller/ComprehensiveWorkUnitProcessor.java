@@ -1,66 +1,74 @@
 package com.setminusx.ramsey.worker.controller;
 
 import com.setminusx.ramsey.worker.client.MiddlewareClient;
-import com.setminusx.ramsey.worker.config.RamseyConfig;
-import com.setminusx.ramsey.worker.model.Graph;
-import com.setminusx.ramsey.worker.utility.UtilityGraph;
-import com.setminusx.ramsey.worker.model.WorkUnit;
-import com.setminusx.ramsey.worker.model.Clique;
-import com.setminusx.ramsey.worker.model.WorkUnitStatus;
-import com.setminusx.ramsey.worker.service.CliqueCheckService;
-import jakarta.annotation.PostConstruct;
+import com.setminusx.ramsey.worker.model.*;
+import com.setminusx.ramsey.worker.service.ComprehensiveCliqueCheckService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.BitSet;
 import java.util.List;
 
 import static com.setminusx.ramsey.worker.utility.TimeUtility.now;
 
-
+/**
+ * This class is responsible for processing work units in a comprehensive manner.
+ * It uses the BitSet-based logic for clique checking and adjacency matrix construction.
+ */
 @Slf4j
 @Component
 public class ComprehensiveWorkUnitProcessor implements WorkUnitProcessor {
 
-    private final CliqueCheckService cliqueCheckService;
-    private final RamseyConfig ramseyConfig;
+    private final ComprehensiveCliqueCheckService cliqueCheckService;
     private final MiddlewareClient middlewareClient;
-    private UtilityGraph utilityGraph;
 
-
-    public ComprehensiveWorkUnitProcessor(CliqueCheckService cliqueCheckService, RamseyConfig ramseyConfig, MiddlewareClient middlewareClient) {
+    public ComprehensiveWorkUnitProcessor(ComprehensiveCliqueCheckService cliqueCheckService, MiddlewareClient middlewareClient) {
         this.cliqueCheckService = cliqueCheckService;
         this.middlewareClient = middlewareClient;
-        this.ramseyConfig = ramseyConfig;
     }
 
-    @PostConstruct
-    public void init() {
-        utilityGraph = new UtilityGraph(ramseyConfig.getVertexCount());
+    private BitSet[] buildAdjacencyMatrixFromEdgeData(String edgeData, int vertexCount) {
+        BitSet[] adjacency = new BitSet[vertexCount];
+        for (int i = 0; i < vertexCount; i++) {
+            adjacency[i] = new BitSet(vertexCount);
+        }
+        int edgeIndex = 0;
+        for (int i = 0; i < vertexCount; i++) {
+            for (int j = i + 1; j < vertexCount; j++) {
+                if (edgeData.charAt(edgeIndex) == '1') {
+                    adjacency[i].set(j);
+                    adjacency[j].set(i);
+                }
+                edgeIndex++;
+            }
+        }
+        return adjacency;
     }
 
     @Override
     public void process(WorkUnit workUnit) {
         log.info("Processing WorkUnit: {}", workUnit);
 
-        if (!workUnit.getBaseGraphId().equals(utilityGraph.getId())) {
-            Graph graph = middlewareClient.getGraphById(workUnit.getBaseGraphId());
-            utilityGraph.applyColoring(graph.getEdgeData(), graph.getGraphId());
+        Graph graph = middlewareClient.getGraphById(workUnit.getBaseGraphId());
+        int vertexCount = graph.getVertexCount();
+        String edgeData = graph.getEdgeData();
+        List<WorkUnitEdge> edgesToFlip = workUnit.getEdgesToFlip();
+
+        // Flip the specified edges in edgeData
+        char[] edgeDataArr = edgeData.toCharArray();
+        for (WorkUnitEdge edge : edgesToFlip) {
+            int i = edge.getVertexOne();
+            int j = edge.getVertexTwo();
+            int edgeIndex = (i * vertexCount - (i * (i + 1)) / 2) + (j - i - 1);
+            edgeDataArr[edgeIndex] = (edgeDataArr[edgeIndex] == '1') ? '0' : '1';
         }
-        workUnit.setProcessingStartedDate(now());
+        String flippedEdgeData = new String(edgeDataArr);
 
-        log.debug("Flipping edges");
-        utilityGraph.flipsEdges(workUnit.getEdgesToFlip());
-
-        log.debug("Checking for cliques in derived graph");
-        List<Clique> derivedGraphCliques = cliqueCheckService.getCliques(utilityGraph);
+        BitSet[] redAdjacency = buildAdjacencyMatrixFromEdgeData(flippedEdgeData, vertexCount);
+        List<List<Integer>> derivedGraphCliques = cliqueCheckService.getCliques(vertexCount, redAdjacency);
+        log.info("Clique count for derived graph: {}", derivedGraphCliques.size());
         workUnit.setCliqueCount(derivedGraphCliques.size());
         workUnit.setCompletedDate(now());
         workUnit.setStatus(WorkUnitStatus.COMPLETE);
-        log.info("Clique count for derived graph: {}", derivedGraphCliques.size());
-
-        log.debug("Reverting base graph");
-        utilityGraph.flipsEdges(workUnit.getEdgesToFlip());
-
     }
-
 }
