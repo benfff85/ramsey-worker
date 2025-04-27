@@ -5,6 +5,7 @@ import com.setminusx.ramsey.worker.config.RamseyConfig;
 import com.setminusx.ramsey.worker.model.*;
 import com.setminusx.ramsey.worker.service.ComprehensiveCliqueCheckService;
 import com.setminusx.ramsey.worker.service.TargetedCliqueCheckServiceBitSet;
+import com.setminusx.ramsey.worker.utility.BitSetMatrixUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -40,7 +41,7 @@ public class TargetedWorkUnitProcessorBitSet implements WorkUnitProcessor {
         if (baseAdjacency == null || !workUnit.getBaseGraphId().equals(baseGraphId)) {
             Graph graph = middlewareClient.getGraphById(workUnit.getBaseGraphId());
             baseVertexCount = graph.getVertexCount();
-            baseAdjacency = buildAdjacencyMatrixFromEdgeData(graph.getEdgeData(), baseVertexCount);
+            baseAdjacency = BitSetMatrixUtils.buildAdjacencyMatrixFromBitString(graph.getEdgeData(), baseVertexCount);
             baseGraphId = graph.getGraphId();
             // Use comprehensiveCliqueCheckService to get all cliques
             List<List<Integer>> cliques = comprehensiveCliqueCheckService.getCliques(baseVertexCount, baseAdjacency);
@@ -50,13 +51,8 @@ public class TargetedWorkUnitProcessorBitSet implements WorkUnitProcessor {
         workUnit.setProcessingStartedDate(now());
 
         // Flip edges for this work unit
-        BitSet[] derivedAdjacency = cloneAdjacencyMatrix(baseAdjacency);
-        for (WorkUnitEdge edge : workUnit.getEdgesToFlip()) {
-            int i = edge.getVertexOne();
-            int j = edge.getVertexTwo();
-            derivedAdjacency[i].flip(j);
-            derivedAdjacency[j].flip(i);
-        }
+        BitSet[] derivedAdjacency = BitSetMatrixUtils.cloneAdjacencyMatrix(baseAdjacency);
+        BitSetMatrixUtils.flipEdges(derivedAdjacency, workUnit.getEdgesToFlip());
 
         // Compute the derived clique count using the targeted BitSet logic
         int brokenCliques = cliqueCollection.getCountOfCliquesContainingEdges(workUnit.getEdgesToFlip());
@@ -68,32 +64,6 @@ public class TargetedWorkUnitProcessorBitSet implements WorkUnitProcessor {
         );
         int cliqueCount = cliqueCollection.size() - brokenCliques + newCliques;
         enrichWorkUnit(cliqueCount, workUnit);
-    }
-
-    private BitSet[] buildAdjacencyMatrixFromEdgeData(String edgeData, int vertexCount) {
-        BitSet[] adjacency = new BitSet[vertexCount];
-        for (int i = 0; i < vertexCount; i++) {
-            adjacency[i] = new BitSet(vertexCount);
-        }
-        int edgeIndex = 0;
-        for (int i = 0; i < vertexCount; i++) {
-            for (int j = i + 1; j < vertexCount; j++) {
-                if (edgeData.charAt(edgeIndex) == '1') {
-                    adjacency[i].set(j);
-                    adjacency[j].set(i);
-                }
-                edgeIndex++;
-            }
-        }
-        return adjacency;
-    }
-
-    private BitSet[] cloneAdjacencyMatrix(BitSet[] adjacency) {
-        BitSet[] clone = new BitSet[adjacency.length];
-        for (int i = 0; i < adjacency.length; i++) {
-            clone[i] = (BitSet) adjacency[i].clone();
-        }
-        return clone;
     }
 
     private void enrichWorkUnit(int cliqueCount, WorkUnit workUnit) {

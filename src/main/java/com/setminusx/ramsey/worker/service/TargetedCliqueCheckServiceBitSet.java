@@ -1,7 +1,7 @@
 package com.setminusx.ramsey.worker.service;
 
-import com.setminusx.ramsey.worker.config.EnablePerfLogging;
 import com.setminusx.ramsey.worker.model.WorkUnitEdge;
+import com.setminusx.ramsey.worker.utility.BitSetMatrixUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -11,20 +11,6 @@ import java.util.*;
 @Service
 public class TargetedCliqueCheckServiceBitSet {
 
-    // In-place inversion: flips all off-diagonal bits in the adjacency matrix
-    public void invertAdjacencyMatrixInPlace(BitSet[] adjacency) {
-        int n = adjacency.length;
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                if (i != j) {
-                    adjacency[i].flip(j);
-                }
-            }
-        }
-    }
-
-    @EnablePerfLogging
-    // Main method for a derived graph: count new cliques containing a flipped edge, by starting recursion with the two vertices of each flipped edge
     public int getNewCliques(BitSet[] derivedAdjacency, int vertexCount, int cliqueSize, List<WorkUnitEdge> flippedEdges) {
         int newCliqueCount = 0;
         // RED (current adjacency)
@@ -42,7 +28,7 @@ public class TargetedCliqueCheckServiceBitSet {
             }
         }
         // BLUE (inverted adjacency)
-        invertAdjacencyMatrixInPlace(derivedAdjacency);
+        BitSetMatrixUtils.invertAdjacencyMatrixInPlace(derivedAdjacency);
         for (WorkUnitEdge edge : flippedEdges) {
             int v1 = edge.getVertexOne();
             int v2 = edge.getVertexTwo();
@@ -56,12 +42,10 @@ public class TargetedCliqueCheckServiceBitSet {
                 newCliqueCount += bronKerboschCount(R, P, X, derivedAdjacency, cliqueSize);
             }
         }
-        // Restore adjacency to original (invert again)
-        invertAdjacencyMatrixInPlace(derivedAdjacency);
         return newCliqueCount;
     }
 
-    // Bron-Kerbosch variant: returns count of cliques of size k found from R
+    // Bron-Kerbosch variant: returns count of cliques of size k found from R (no pivoting, correct for seeded search)
     private int bronKerboschCount(BitSet R, BitSet P, BitSet X, BitSet[] adjacency, int cliqueSize) {
         if (R.cardinality() == cliqueSize) {
             return 1;
@@ -81,4 +65,5 @@ public class TargetedCliqueCheckServiceBitSet {
         }
         return count;
     }
+
 }
