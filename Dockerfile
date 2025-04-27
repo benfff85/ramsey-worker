@@ -23,9 +23,12 @@ WORKDIR /app
 # Copy the built JAR file from the build stage
 COPY --from=build /app/target/ramsey-worker-*.jar /app/ramsey-worker.jar
 
+# JVM memory and container awareness settings
+ENV JAVA_OPTS="-Xms2g -Xmx2g -XX:MaxRAMPercentage=75.0"
+
 # Add a non-root user and switch to it
 RUN groupadd -r appgroup && useradd -r -g appgroup appuser
 USER appuser
 
 # Specify the command to run the application with JAVA_OPTS from the environment
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /app/ramsey-worker.jar"]
+CMD ["sh", "-c", "java $JAVA_OPTS -jar /app/ramsey-worker.jar"]
