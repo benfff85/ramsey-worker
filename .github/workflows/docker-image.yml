@@ -20,7 +20,14 @@ jobs:
 
       - name: Download Eclipse Temurin JDK 24
         run: |
-          wget -O openjdk24.tar.gz $(curl -sL https://api.github.com/repos/adoptium/temurin24-binaries/releases/latest | grep browser_download_url | grep linux_x64_bin.tar.gz | cut -d '"' -f 4)
+          DOWNLOAD_URL=$(curl -sL https://api.github.com/repos/adoptium/temurin24-binaries/releases/latest | \
+            grep "browser_download_url" | grep "jdk_x64_linux_hotspot" | grep ".tar.gz" | cut -d '"' -f 4 | head -n 1)
+          if [ -z "$DOWNLOAD_URL" ]; then
+            echo "Could not find a suitable JDK 24 binary download URL."
+            exit 1
+          fi
+          echo "Download URL: $DOWNLOAD_URL"
+          wget -O openjdk24.tar.gz "$DOWNLOAD_URL"
           tar -xzf openjdk24.tar.gz
           JAVA_DIR=$(tar -tf openjdk24.tar.gz | head -1 | cut -f1 -d"/")
           echo "JAVA_HOME=$PWD/$JAVA_DIR" >> $GITHUB_ENV
