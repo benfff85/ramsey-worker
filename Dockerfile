@@ -24,7 +24,7 @@ WORKDIR /app
 COPY --from=build /app/target/ramsey-worker-*.jar /app/ramsey-worker.jar
 
 # JVM memory and container awareness settings
-ENV JAVA_OPTS="-Xms2g -Xmx2g -XX:MaxRAMPercentage=75.0"
+ENV JAVA_OPTS="-XX:InitialRAMPercentage=75.0 -XX:MaxRAMPercentage=75.0"
 
 # Add a non-root user and switch to it
 RUN groupadd -r appgroup && useradd -r -g appgroup appuser
