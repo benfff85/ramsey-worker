@@ -20,8 +20,7 @@ jobs:
 
       - name: Download Eclipse Temurin JDK 24
         run: |
-          DOWNLOAD_URL=$(curl -sL https://api.github.com/repos/adoptium/temurin24-binaries/releases/latest | \
-            grep "browser_download_url" | grep "jdk_x64_linux_hotspot" | grep ".tar.gz" | cut -d '"' -f 4 | head -n 1)
+          DOWNLOAD_URL=$(curl -s "https://api.adoptium.net/v3/assets/feature_releases/24/ga?architecture=x64&heap_size=normal&image_type=jdk&jvm_impl=hotspot&os=linux" | jq -r '.[0].binaries[0].package.link')
           if [ -z "$DOWNLOAD_URL" ]; then
             echo "Could not find a suitable JDK 24 binary download URL."
             exit 1
