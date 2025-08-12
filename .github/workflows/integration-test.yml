@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Download Eclipse Temurin JDK 24
       run: |
             DOWNLOAD_URL=$(curl -sL https://api.github.com/repos/adoptium/temurin24-binaries/releases/latest | \
