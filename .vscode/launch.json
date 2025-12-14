@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-ramsey-worker-local",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.setminusx.ramsey.worker.Application",
+            "projectName": "ramsey-worker",
+            "args": "",
+            "env": {},
+            "vmArgs": "-Dspring.profiles.active=local -XX:+UseZGC -XX:+UseCompactObjectHeaders"
+        }
+    ]
+}
